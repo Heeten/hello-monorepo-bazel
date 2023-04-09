@@ -1,0 +1,6 @@
+[book]
+authors = ["Heeten"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Hello Bazel Monorepo (Rust, C++, Docker, gRPC)"
