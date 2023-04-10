@@ -6,11 +6,11 @@ First we'll create "hello world" rust binary. Then we'll create the C++ library,
 Once we're done this chapter, this binary will print out a random number gint from 0 to a user provided arg. We'll start
 with just making sure we can build a rust binary and print hello world!.
 
-We're going to put all the randint related code in the directory `$HOME/repo/src/randint`, let's go ahead and make and cd
+We're going to put all the summation related code in the directory `$HOME/repo/src/summation`, let's go ahead and make and cd
 that:
 ```shell
-mkdir -p "${HOME}/repo/src/randint"
-cd "${HOME}/repo/src/randint"
+mkdir -p "${HOME}/repo/src/summation"
+cd "${HOME}/repo/src/summation"
 ```
 
 ## BUILD files
@@ -22,14 +22,14 @@ build them. The rules_rust [rust_binary](http://bazelbuild.github.io/rules_rust/
 > environment variables they should be set in the BUILD file, setting them in your environment won't pass them
 > through to the sandbox
 
-Open up `$HOME/repo/src/randint/BUILD` in your favorit text editor and lets setup the build rules for our binary.
+Open up `$HOME/repo/src/summation/BUILD` in your favorit text editor and lets setup the build rules for our binary.
 ```python
 # This tells bazel to load the rust_binary rule from the rules_rust package
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 rust_binary(
-    #We are going to call the target/binary randint
-    name = "randint",
+    #We are going to call the target/binary summation
+    name = "summation",
     #The list of src files it needs (just main.rs)
     srcs = ["main.rs"],
     #Any libraries/crates it depends on, for now we'll leave this blank
@@ -48,12 +48,12 @@ fn main() {
 
 Now lets try to build it by running:
 ```shell
-bazel build :randint
+bazel build :summation
 ```
 
 And it fails! If you get what I got you'll see something like:
 ```shell
-$ bazel build :randint
+$ bazel build :summation
 Starting local Bazel server and connecting to it...
 INFO: Repository local_config_cc instantiated at:
   /DEFAULT.WORKSPACE.SUFFIX:509:13: in <toplevel>
@@ -95,9 +95,9 @@ INFO: Repository rust_linux_x86_64__x86_64-unknown-linux-gnu__stable_tools insta
   /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:496:36: in rust_toolchain_repository
 Repository rule rust_toolchain_tools_repository defined at:
   /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:333:50: in <toplevel>
-ERROR: /home/parallels/repo/src/randint/BUILD:4:12: //src/randint:randint depends on @local_config_cc//:cc-compiler-k8 in repository @local_config_cc which failed to fetch. no such package '@local_config_cc//':
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: //src/summation:summation depends on @local_config_cc//:cc-compiler-k8 in repository @local_config_cc which failed to fetch. no such package '@local_config_cc//':
 Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
-ERROR: Analysis of target '//src/randint:randint' failed; build aborted: Analysis failed
+ERROR: Analysis of target '//src/summation:summation' failed; build aborted: Analysis failed
 INFO: Elapsed time: 11.669s
 INFO: 0 processes.
 FAILED: Build did NOT complete successfully (92 packages loaded, 187 targets configured)
@@ -112,18 +112,18 @@ the build-essential package on debian which includes gcc, g++, and libc.
 sudo apt-get install build-essential
 ```
 
-Once you've installed that let's try `bazel build :randint` again and see what happens
+Once you've installed that let's try `bazel build :summation` again and see what happens
 ```shell
-$ bazel build :randint
-ERROR: /home/parallels/repo/src/randint/BUILD:4:12: in rust_binary rule //src/randint:randint:
+$ bazel build :summation
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: in rust_binary rule //src/summation:summation:
 Traceback (most recent call last):
         File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/private/rust.bzl", line 351, column 34, in _rust_binary_impl
                 edition = get_edition(ctx.attr, toolchain, ctx.label),
         File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/private/rust.bzl", line 125, column 13, in get_edition
                 fail("Attribute `edition` is required for {}.".format(label))
-Error in fail: Attribute `edition` is required for @//src/randint:randint.
-ERROR: /home/parallels/repo/src/randint/BUILD:4:12: Analysis of target '//src/randint:randint' failed
-ERROR: Analysis of target '//src/randint:randint' failed; build aborted:
+Error in fail: Attribute `edition` is required for @//src/summation:summation.
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: Analysis of target '//src/summation:summation' failed
+ERROR: Analysis of target '//src/summation:summation' failed; build aborted:
 INFO: Elapsed time: 12.699s
 INFO: 0 processes.
 FAILED: Build did NOT complete successfully (10 packages loaded, 325 targets configured)
@@ -135,13 +135,13 @@ an edition on the `rust_register_toolchains()` call by changing it to:
 rust_register_toolchains(edition = "2021")
 ```
 
-Hopefully the third time is a charm? Let's see what `bazel build :randint` does this time:
+Hopefully the third time is a charm? Let's see what `bazel build :summation` does this time:
 ```shell
-$ bazel build :randint
-INFO: Analyzed target //src/randint:randint (1 packages loaded, 60 targets configured).
+$ bazel build :summation
+INFO: Analyzed target //src/summation:summation (1 packages loaded, 60 targets configured).
 INFO: Found 1 target...
-Target //src/randint:randint up-to-date:
-  bazel-bin/src/randint/randint
+Target //src/summation:summation up-to-date:
+  bazel-bin/src/summation/summation
 INFO: Elapsed time: 31.562s, Critical Path: 9.39s
 INFO: 94 processes: 91 internal, 3 linux-sandbox.
 INFO: Build completed successfully, 94 total actions
@@ -150,20 +150,20 @@ INFO: Build completed successfully, 94 total actions
 Success! Now before we get up for a coffee break lets just make sure it actually runs. You can use the `bazel run`
 subcommand to run the binary.
 ```shell
-$ bazel run :randint
-INFO: Analyzed target //src/randint:randint (24 packages loaded, 172 targets configured).
+$ bazel run :summation
+INFO: Analyzed target //src/summation:summation (24 packages loaded, 172 targets configured).
 INFO: Found 1 target...
-Target //src/randint:randint up-to-date:
-  bazel-bin/src/randint/randint
+Target //src/summation:summation up-to-date:
+  bazel-bin/src/summation/summation
 INFO: Elapsed time: 0.520s, Critical Path: 0.01s
 INFO: 1 process: 1 internal.
 INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/src/randint/randint
+INFO: Running command line: bazel-bin/src/summation/summation
 Hello world
 ```
 
 It worked! One thing to note is this ran it inside bazel, and it output a bunch of bazel log messages. The second
-to last line of the output says `INFO: Running command line: bazel-bin/src/randint/randint`.
+to last line of the output says `INFO: Running command line: bazel-bin/src/summation/summation`.
 
 What is that? Let's go to the repo directory and see:
 ```shell
@@ -179,9 +179,9 @@ drwxr-xr-x 3 parallels parallels 4096 Apr 10 18:23 src
 ```
 
 You can see bazel created a bunch of symlinks to a mysterious `.cache/bazel` directory. When you run bazel, it caches build artifacts to avoid rebuilding things that didn't change, and these symlinks give us a way to access the artifacts bazel
-produces. If we want, we can run the binary directly by running `$HOME/repo/bazel-bin/src/randint/randint`. Let's try that:
+produces. If we want, we can run the binary directly by running `$HOME/repo/bazel-bin/src/summation/summation`. Let's try that:
 ```shell
-$ $HOME/repo/bazel-bin/src/randint/randint
+$ $HOME/repo/bazel-bin/src/summation/summation
 Hello world
 ```
 Now we see the output of the binary without any of the bazel messages because we are invoking it directly.

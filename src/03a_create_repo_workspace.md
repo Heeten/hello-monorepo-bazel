@@ -2,7 +2,7 @@
 
 One of the benefits of Bazel is when you have a lot of different
 components/modules/crates/packages/whatever-you-call-it that need to connect together. In our example
-we're going to imagine there's a team that owns a C++ implementation of the randint() function and that they
+we're going to imagine there's a team that owns a C++ implementation of the summation() function and that they
 provide a rust interface and rust CLI to call these functions.
 
 > **NOTE**: There are different ways to organize a monorepo. Bazel doesn't

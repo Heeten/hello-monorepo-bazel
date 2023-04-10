@@ -10,5 +10,5 @@ bazel build -c opt //...
 
 ```shell
 #Runs out example CLI from a build with optimization enabled
-bazel run -c opt //src/randint:randint
+bazel run -c opt //src/summation:summation
 ```

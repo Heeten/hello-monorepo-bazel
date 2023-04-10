@@ -7,32 +7,32 @@ It's also possible to make a C++ binary depend on a rust library, to do that you
 We'll also use Bazel's [visibility](https://bazel.build/concepts/visibility) concept to restrict other monorepo packages from depending on anything but the Rust library.
 
 # Making the C++ library
-We'll make a overly simplistic randint library for example purposes.
+We'll make a overly simplistic summation library for example purposes.
 
-Let's make a header file by creating `$HOME/repo/src/randint/cc_lib.h`
+Let's make a header file by creating `$HOME/repo/src/summation/cc_lib.h`
 ```cpp
 #ifndef __RANDINT_CC_LIB_H__
 #define __RANDINT_CC_LIB_H__
 
 #include <stdint.h>
 
-uint32_t randint(uint32_t i);
+uint32_t summation(uint32_t i);
 
 #endif
 ```
 
-Then lets implement the function by `$HOME/repo/src/randint/cc_lib.cc`
+Then lets implement the function by `$HOME/repo/src/summation/cc_lib.cc`
 ```cpp
-#include "src/randint/cc_lib.h"
+#include "src/summation/cc_lib.h"
 #include <cstdlib>
 
-uint32_t randint(uint32_t i) {
+uint32_t summation(uint32_t i) {
   //Yes we aren't seeding with srand, this is just for example purposes
   return std::rand() * i;
 }
 ```
 
-Finally let's make a build target for it by adding this to `$HOME/repo/src/randint/BUILD`
+Finally let's make a build target for it by adding this to `$HOME/repo/src/summation/BUILD`
 ```python
 cc_library(
     name = "cc_lib",
@@ -41,7 +41,7 @@ cc_library(
 )
 ```
 
-Now lets build it. Before we ran `bazel build :randint` to specify the specific target we wanted to build.
+Now lets build it. Before we ran `bazel build :summation` to specify the specific target we wanted to build.
 We're going to switch to running `bazel build //...`, which will build all the targets (that need to be rebuilt)
 in the repo. Sometimes this is handy when you want to make sure you didn't break the build for any downstream
 consumers of the code you're changing.
@@ -60,10 +60,10 @@ on the path to them. I also have them all have the same top-level prefix to ensu
 crates. This also makes it easy for me to see a crate name in a source file (like in a use statement) and know
 where to find it in the monorepo.
 
-So I'll add the following rule to `$HOME/repo/src/randint/BUILD` to build the rust library.
+So I'll add the following rule to `$HOME/repo/src/summation/BUILD` to build the rust library.
 ```python
 rust_library(
-    name = "src_randint",
+    name = "src_summation",
     srcs = ["lib.rs"],
     deps = [":cc_lib"],
     visibility = ["//visibility:public"],
@@ -72,7 +72,7 @@ rust_library(
 
 The `deps` tag says this library depends on the `cc_lib` target in this package.
 
-If I wanted I could set the `crate_name` setting to override the crate name, but if I don't it'll default to what `name` is, so `src_randint` in this case. I could also have set `crate_root` like I did for the rust_binary rule before, but if I don't it'll default to `lib.rs` for a library target.
+If I wanted I could set the `crate_name` setting to override the crate name, but if I don't it'll default to what `name` is, so `src_summation` in this case. I could also have set `crate_root` like I did for the rust_binary rule before, but if I don't it'll default to `lib.rs` for a library target.
 
 We'll also need to tell Bazel to load the `rust_library` rule by updating the top of `BUILD` to have `load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")`
 The full BUILD file will now look like
@@ -81,8 +81,8 @@ The full BUILD file will now look like
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
 
 rust_binary(
-    #We are going to call the target/binary randint
-    name = "randint",
+    #We are going to call the target/binary summation
+    name = "summation",
     #The list of src files it needs (just main.rs)
     srcs = ["main.rs"],
     #Any libraries/crates it depends on, for now we'll leave this blank
@@ -98,7 +98,7 @@ cc_library(
 )
 
 rust_library(
-    name = "src_randint",
+    name = "src_summation",
     srcs = ["lib.rs"],
     deps = [":cc_lib"],
     visibility = ["//visibility:public"],
@@ -119,17 +119,17 @@ INFO: Build completed successfully, 2 total actions
 Looks like it's working!
 
 ## Updating the CLI to use the library
-In this step we'll change our CLI to use the randint rust library.
+In this step we'll change our CLI to use the summation rust library.
 
-First, lets update the `BUILD` to depend on it by adding `:src_randint` to the deps.
+First, lets update the `BUILD` to depend on it by adding `:src_summation` to the deps.
 ```python
 rust_binary(
-    #We are going to call the target/binary randint
-    name = "randint",
+    #We are going to call the target/binary summation
+    name = "summation",
     #The list of src files it needs (just main.rs)
     srcs = ["main.rs"],
     #Any libraries/crates this binary depends on to compile
-    deps = [":src_randint"],
+    deps = [":src_summation"],
     #The crate_root file, this would default to main.rs but we put it in for clarity
     crate_root = "main.rs",
 )
