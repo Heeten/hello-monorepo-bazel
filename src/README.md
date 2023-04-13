@@ -18,8 +18,10 @@ speedbumps I hit and this doc will share how I dealt with them.
 Bazel provides a lot of flexability, and I'll share the choices I made but they aren't
 the only way or the right way to do things, just the way I did.
 
-There are lots of docs that talk about the pros and cons of monorepos.
-This isn't one of them. I avoid talking about why you might want to do this
-and just talk about how I do it.
+If you're interested in why you should use a monorepo, this doc will disappoint you.
+I'm just focusing on how to use Bazel here, not why. Monorepos address certain painpoints
+that occur when you have lots of projects that all depend on each other.If cargo is working
+great for you, then you probably don't need or want a system like Bazel or Buck2. If you do want
+to try Bazel with rust, hopefully this doc will help you.
 
 Inspired by the style of [Learn Rust With Entirely Too Many Linked Lists](https://rust-unofficial.github.io/too-many-lists/), if you walk through the examples in this doc you'll see some of the speed-bumps hit and how to deal with them. If you want to skip this and just see the final working example, its available on GitHub at at todo!()
