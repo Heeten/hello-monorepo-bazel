@@ -9,7 +9,7 @@
 - [Link rust binary to library](./03e_rust_linked_binary.md)
 - ['--release mode' builds](./release_mode.md)
 - [Pulling in external crates like Clap](./05_rust_cli_client_with_clap.md)
+- [Building Rust protobuf](./rust_protobuf.md)
 - [Rust gRPC Server](./04_rust_grpc_server_and_third_party_crates.md)
-- [C++ binary that depends on rust library](./cpp_binary.md)
 - [Docker Container](./06_docker_container.md)
 - [Running on Google Cloud Run](./07_cloud_run.md)

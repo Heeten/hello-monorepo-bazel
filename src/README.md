@@ -1,4 +1,4 @@
-# Using Bazel with Rust, C++, Docker and gRPC
+# Using Bazel with Rust, gRPC, protobuf, and Docker
 
 > **NOTE**: Buck2 was recently released and part of the motivation for this doc
 > is providing a simple example of using Bazel and then replicating it with Buck2
