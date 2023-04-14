@@ -24,4 +24,4 @@ that occur when you have lots of projects that all depend on each other.If cargo
 great for you, then you probably don't need or want a system like Bazel or Buck2. If you do want
 to try Bazel with rust, hopefully this doc will help you.
 
-Inspired by the style of [Learn Rust With Entirely Too Many Linked Lists](https://rust-unofficial.github.io/too-many-lists/), if you walk through the examples in this doc you'll see some of the speed-bumps hit and how to deal with them. If you want to skip this and just see the final working example, its available on GitHub at at todo!()
+Inspired by the style of [Learn Rust With Entirely Too Many Linked Lists](https://rust-unofficial.github.io/too-many-lists/), if you walk through the examples in this doc you'll see some of the speed-bumps hit and how to deal with them. Here's the [working example](https://github.com/Heeten/hello-monorepo-bazel-example) from going through the book.

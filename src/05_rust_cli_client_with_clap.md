@@ -274,5 +274,3 @@ Options:
   -h, --help  Print help
 
 ```
-
-**TODO, finish this**
