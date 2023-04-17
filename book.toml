@@ -3,4 +3,4 @@ authors = ["Heeten"]
 language = "en"
 multilingual = false
 src = "src"
-title = "Hello Polyglot (Rust+...) Monorepo with Bazel"
+title = "Using Bazel with Rust, gRPC, protobuf, and Docker"
