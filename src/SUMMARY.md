@@ -13,3 +13,5 @@
 - [Rust gRPC Server](./04_rust_grpc_server_and_third_party_crates.md)
 - [Docker Container](./06_docker_container.md)
 - [Pushing containers and running on Google Cloud](./07_cloud_run.md)
+- [Conclusion](./conclusion.md)
+- [PS: Tearing down](./teardown.md)

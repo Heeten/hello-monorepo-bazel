@@ -160,13 +160,15 @@ bazel run -c opt //src/services/summation:server
 
 Finally, to test it we'll use `grpcurl`. If you're on the debian VM we built you can use the following to get the binary:
 ```shell
+cd $HOME/repo
 curl -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_linux_x86_64.tar.gz -o grpcurl.tar.gz
 tar -xzvf grpcurl.tar.gz grpcurl
 ```
 
 And then run it:
 ```shell
-./grpcurl -proto $HOME/repo/src/proto/summation/summation.proto -plaintext -d '{"value": 5.0, "value": 2.0}' localhost:50051 src_proto_summation.Summation/ComputeSumF64
+cd $HOME/repo
+./grpcurl -proto repo/src/proto/summation/summation.proto -plaintext -d '{"value": 5.0, "value": 2.0}' localhost:50051 src_proto_summation.Summation/ComputeSumF64
 ```
 
 This should output:
