@@ -4,8 +4,8 @@
 > is providing a simple example of using Bazel and then replicating it with Buck2
 > to learn how the two compare.
 
-This doc walks through creating a rust library (crate), rust binary, docker image, and then a Google Cloud run service
-all using Bazel. When I started using Bazel for Rust that I ran into less roadblocks
+This doc walks through creating a rust library (crate), rust binary, unit test, docker image, and Google Cloud run service
+using Bazel. When I started using Bazel for Rust that I ran into less roadblocks
 than I expected, but there were lots of speedbumps and I hope this walk-through helps with that.
 
 Bazel provides lots of flexability and in this doc I make certain choices on conventions for directory structure and

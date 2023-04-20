@@ -4,6 +4,7 @@ To add tests to our rust library we'll use the rules_rust [rust_test](https://ba
 
 Let's add the rule to `$HOME/repo/src/summation/BUILD` by adding these lines:
 ```python
+load("@rules_rust//rust:defs.bzl", "rust_test")
 rust_test(
     name = "lib_test",
     crate = ":src_summation",
@@ -11,7 +12,7 @@ rust_test(
 )
 ```
 
-We'll also have to update the top load line to include "rust_test" now:
+We can also combine all the `load` lines into one, consolidating them into this at the top of `BUILD`:
 ```python
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 ```
@@ -22,14 +23,13 @@ If you run it you should see something like
 ```shell
 INFO: Analyzed 3 targets (2 packages loaded, 156 targets configured).
 INFO: Found 2 targets and 1 test target...
-INFO: Elapsed time: 0.671s, Critical Path: 0.38s
+INFO: Elapsed time: 0.874s, Critical Path: 0.34s
 INFO: 5 processes: 2 internal, 3 linux-sandbox.
 INFO: Build completed successfully, 5 total actions
 //src/summation:lib_test                                                 PASSED in 0.0s
 
 Executed 1 out of 1 test: 1 test passes.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
-###TODO UPDATE
 ```
 
 You can see it "ran" our tests but right now we haven't defined any tests so it's a bit of no-op.
@@ -56,12 +56,12 @@ And run `bazel test //...` again:
 ```shell
 INFO: Analyzed 3 targets (0 packages loaded, 0 targets configured).
 INFO: Found 2 targets and 1 test target...
-FAIL: //src/summation:lib_test (see /home/parallels/.cache/bazel/_bazel_parallels/8136e33dd0c038f4f223262d62801c45/execroot/__main__/bazel-out/k8-fastbuild/testlogs/src/summation/lib_test/test.log)
-INFO: Elapsed time: 0.384s, Critical Path: 0.24s
+FAIL: //src/summation:lib_test (see /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs/src/summation/lib_test/test.log)
+INFO: Elapsed time: 0.604s, Critical Path: 0.40s
 INFO: 4 processes: 4 linux-sandbox.
 INFO: Build completed, 1 test FAILED, 4 total actions
 //src/summation:lib_test                                                 FAILED in 0.0s
-  /home/parallels/.cache/bazel/_bazel_parallels/8136e33dd0c038f4f223262d62801c45/execroot/__main__/bazel-out/k8-fastbuild/testlogs/src/summation/lib_test/test.log
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs/src/summation/lib_test/test.log
 
 Executed 1 out of 1 test: 1 fails locally.
 ```
@@ -93,10 +93,9 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; 
 So we can see our test failed because 3.0 does not equal 0.0. Let's fix the test by changing the `assert_eq!(res, 0.0);` to `assert_eq!(res, 3.0);` and rerun:
 ```shell
 $ bazel test //...
-WARNING: Ignoring JAVA_HOME, because it must point to a JDK, not a JRE.
 INFO: Analyzed 3 targets (0 packages loaded, 0 targets configured).
 INFO: Found 2 targets and 1 test target...
-INFO: Elapsed time: 0.396s, Critical Path: 0.26s
+INFO: Elapsed time: 0.595s, Critical Path: 0.42s
 INFO: 4 processes: 4 linux-sandbox.
 INFO: Build completed successfully, 4 total actions
 //src/summation:lib_test                                                 PASSED in 0.0s

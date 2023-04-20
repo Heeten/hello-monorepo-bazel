@@ -66,19 +66,19 @@ sum = 0
 Let's try running it with some arguments. We'll use `--` to seperate arguments to bazel run and arguments
 to our binary (we'll also omit some bazel log statements):
 ```shell
-bazel run //src/summation:executable -- 1 2 3.0
+$ bazel run //src/summation:executable -- 1 2 3.0
 sum = 6
 ```
 
 Finally, let's run with an `optimized` binary by adding `-c opt`, getting something equivilant to running with `--release` in cargo:
 ```shell
-bazel run -c opt //src/summation:executable -- 1 2 3.0
+$ bazel run -c opt //src/summation:executable -- 1 2 3.0
 INFO: Build option --compilation_mode has changed, discarding analysis cache.
 INFO: Analyzed target //src/summation:executable (0 packages loaded, 517 targets configured).
 INFO: Found 1 target...
 Target //src/summation:executable up-to-date:
   bazel-bin/src/summation/executable
-INFO: Elapsed time: 0.840s, Critical Path: 0.40s
+INFO: Elapsed time: 1.278s, Critical Path: 0.55s
 INFO: 48 processes: 46 internal, 2 linux-sandbox.
 INFO: Build completed successfully, 48 total actions
 INFO: Running command line: bazel-bin/src/summation/executable 1 2 3.0

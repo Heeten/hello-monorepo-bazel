@@ -53,7 +53,53 @@ bazel build :executable
 And it fails! If you get what I got you'll see something like:
 ```shell
 $ bazel build :executable
-### UPDATE OUTPUT
+INFO: Repository local_config_cc instantiated at:
+  /DEFAULT.WORKSPACE.SUFFIX:509:13: in <toplevel>
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl:184:16: in cc_configure
+Repository rule cc_autoconf defined at:
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl:143:30: in <toplevel>
+ERROR: An error occurred during the fetch of repository 'local_config_cc':
+   Traceback (most recent call last):
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl", line 125, column 33, in cc_autoconf_impl
+                configure_unix_toolchain(repository_ctx, cpu_value, overriden_tools)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl", line 349, column 17, in configure_unix_toolchain
+                cc = find_cc(repository_ctx, overriden_tools)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl", line 314, column 23, in find_cc
+                cc = _find_generic(repository_ctx, "gcc", "CC", overriden_tools)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl", line 310, column 32, in _find_generic
+                auto_configure_fail(msg)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/lib_cc_configure.bzl", line 112, column 9, in auto_configure_fail
+                fail("\n%sAuto-Configuration Error:%s %s\n" % (red, no_color, msg))
+Error in fail:
+Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
+ERROR: /DEFAULT.WORKSPACE.SUFFIX:509:13: fetching cc_autoconf rule //external:local_config_cc: Traceback (most recent call last):
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl", line 125, column 33, in cc_autoconf_impl
+                configure_unix_toolchain(repository_ctx, cpu_value, overriden_tools)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl", line 349, column 17, in configure_unix_toolchain
+                cc = find_cc(repository_ctx, overriden_tools)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl", line 314, column 23, in find_cc
+                cc = _find_generic(repository_ctx, "gcc", "CC", overriden_tools)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl", line 310, column 32, in _find_generic
+                auto_configure_fail(msg)
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/lib_cc_configure.bzl", line 112, column 9, in auto_configure_fail
+                fail("\n%sAuto-Configuration Error:%s %s\n" % (red, no_color, msg))
+Error in fail:
+Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
+INFO: Repository rust_linux_x86_64__x86_64-unknown-linux-gnu__stable_tools instantiated at:
+  /home/parallels/repo/WORKSPACE:18:25: in <toplevel>
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:203:14: in rust_register_toolchains
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/build_defs/repo/utils.bzl:233:18: in maybe
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:874:65: in rust_repository_set
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:496:36: in rust_toolchain_repository
+Repository rule rust_toolchain_tools_repository defined at:
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:333:50: in <toplevel>
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: //src/summation:executable depends on @local_config_cc//:cc-compiler-k8 in repository @local_config_cc which failed to fetch. no such package '@local_config_cc//':
+Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
+ERROR: Analysis of target '//src/summation:executable' failed; build aborted: Analysis failed
+INFO: Elapsed time: 8.170s
+INFO: 0 processes.
+FAILED: Build did NOT complete successfully (93 packages loaded, 187 targets configured)
+    Fetching https://static.rust-lang.org/dist/rustc-1.68.1-x86_64-unknown-linux-gnu.tar.gz
 ```
 
 For most dependencies, you'll tell Bazel where to find them and it'll pull them down for you.
@@ -66,7 +112,18 @@ sudo apt-get install build-essential
 Once you've installed that let's try `bazel build :executable` again and see what happens
 ```shell
 $ bazel build :executable
-###UPDATE OUTPUT
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: in rust_binary rule //src/summation:executable:
+Traceback (most recent call last):
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/private/rust.bzl", line 351, column 34, in _rust_binary_impl
+                edition = get_edition(ctx.attr, toolchain, ctx.label),
+        File "/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/private/rust.bzl", line 125, column 13, in get_edition
+                fail("Attribute `edition` is required for {}.".format(label))
+Error in fail: Attribute `edition` is required for @//src/summation:executable.
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: Analysis of target '//src/summation:executable' failed
+ERROR: Analysis of target '//src/summation:executable' failed; build aborted:
+INFO: Elapsed time: 17.253s
+INFO: 0 processes.
+FAILED: Build did NOT complete successfully (9 packages loaded, 325 targets configured)
 ```
 
 This time it fails again saying we didn't set the edition. We could manually set the edition on the rule, but that's kind of annoying if we want to use the same edition across the repo, so lets open up our `$HOME/repo/WORKSPACE` file and specify
@@ -78,14 +135,28 @@ rust_register_toolchains(edition = "2021")
 Hopefully the third time is a charm? Let's see what `bazel build :executable` does this time:
 ```shell
 $ bazel build :executable
-###UPDATE OUTPUT
+INFO: Analyzed target //src/summation:executable (1 packages loaded, 60 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 16.776s, Critical Path: 5.44s
+INFO: 94 processes: 91 internal, 3 linux-sandbox.
+INFO: Build completed successfully, 94 total actions
 ```
 
 Success! Now before we get up for a coffee break lets just make sure it actually runs. You can use the `bazel run`
 subcommand to run the binary.
 ```shell
 $ bazel run :executable
-###UPDATE OUTPUT
+INFO: Analyzed target //src/summation:executable (24 packages loaded, 172 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 0.455s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/src/summation/executable
+Hello world
 ```
 
 It worked! One thing to note is this ran it inside bazel, and it output a bunch of bazel log messages. The second
@@ -95,13 +166,13 @@ What is that? Let's go to the repo directory and see:
 ```shell
 $ ls -l $HOME/repo
 total 28
--rw-r--r-- 1 parallels parallels  798 Apr 10 18:50 WORKSPACE
--rw-r--r-- 1 parallels parallels  782 Apr 10 18:13 WORKSPACE~
-lrwxrwxrwx 1 parallels parallels  123 Apr 10 18:53 bazel-bin -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/bin
-lrwxrwxrwx 1 parallels parallels  106 Apr 10 18:53 bazel-out -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out
-lrwxrwxrwx 1 parallels parallels   96 Apr 10 18:53 bazel-repo -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__
-lrwxrwxrwx 1 parallels parallels  128 Apr 10 18:53 bazel-testlogs -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs
-drwxr-xr-x 3 parallels parallels 4096 Apr 10 18:23 src
+-rw-r--r-- 1 parallels parallels  798 Apr 20 14:40 WORKSPACE
+-rw-r--r-- 1 parallels parallels  782 Apr 20 14:36 WORKSPACE~
+lrwxrwxrwx 1 parallels parallels  123 Apr 20 14:40 bazel-bin -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/bin
+lrwxrwxrwx 1 parallels parallels  106 Apr 20 14:40 bazel-out -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out
+lrwxrwxrwx 1 parallels parallels   96 Apr 20 14:40 bazel-repo -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__
+lrwxrwxrwx 1 parallels parallels  128 Apr 20 14:40 bazel-testlogs -> /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs
+drwxr-xr-x 3 parallels parallels 4096 Apr 20 14:37 src
 ```
 
 You can see bazel created a bunch of symlinks to a mysterious `.cache/bazel` directory. When you run bazel, it caches build artifacts to avoid rebuilding things that didn't change, and these symlinks give us a way to access the artifacts bazel

@@ -26,7 +26,7 @@ down external dependencies. In this chapter the main external dependency we'll n
 [rules_rust](https://bazelbuild.github.io/rules_rust/) which contains the bazel rules for how to go from rust
 source files to libraries (crates) and binaries.
 
-Go ahead and open up `$HOME/repo/WORKSPACE` in your favorite text editors and put this in there. Bazel uses
+Go ahead and open up `$HOME/repo/WORKSPACE` in your favorite text editors[^note] and put this in there. Bazel uses
 the Starlark language for configuration files, which is a dialect of Python.
 ```python
 # This command tells bazel to load the http_archive rule which is used
@@ -89,3 +89,5 @@ Getting more help:
   bazel help info-keys
                    Displays a list of keys used by the info command.
 ```
+
+[^note]: I installed emacs on the vm at this point with `sudo apt-get install emacs-nox`

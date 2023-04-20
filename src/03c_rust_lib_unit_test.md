@@ -16,6 +16,7 @@ where to find it in the monorepo.
 
 Having settled the naming delima let's add the library to `$HOME/repo/src/summation/BUILD` by adding these lines to the file (the name attribute is what the crate name defaults to):
 ```python
+load("@rules_rust//rust:defs.bzl", "rust_library")
 rust_library(
     name = "src_summation",
     srcs = [
@@ -34,8 +35,6 @@ Now let's make `$HOME/repo/src/summation/lib.rs`:
 ```rust
 pub mod f64;
 pub mod u32;
-
-pub fn summation<T: Add>(
 ```
 
 If we don't have the `mod` lines, when bazel runs rustc it'll ignore the f64.rs and u32.rs files since rustc uses the crate root source file to figure out what to compile.

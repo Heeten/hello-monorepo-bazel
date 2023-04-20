@@ -11,19 +11,31 @@ If you're starting from our blank VM we'll need to install rust and cargo. Using
 curl https://sh.rustup.rs -sSf | sh
 ```
 
-Next lets install `cargo raze`
+Add cargo to the path:
 ```shell
-#TODO
+source "$HOME/.cargo/env"
 ```
 
-Now that we have Cargo, lets add some crates to our Bazel repo. We'll put our third-party rust dependencies under the `//third_party/rust` path in our repo. First let's make that
+Next lets install `cargo raze`
+```shell
+cargo install cargo-raze
+```
+
+If you're using the VM we setup, that failed saying `The pkg-config command could not be found` and also complaining about open ssl. Let's fix that and try
+again:
+```shell
+sudo apt install pkg-config libssl-dev
+cargo install cargo-raze
+```
+
+Now that we have Cargo and cargo-raze, lets put our third-party rust dependencies under the `//third_party/rust` path in our repo. First let's make that
 directory:
 ```shell
 mkdir $HOME/repo/third_party
 mkdir $HOME/repo/third_party/rust
 ```
 
-Now lets make `$HOME/repo/third_party/rust/Cargo.toml` and follow the [raze instructions](https://github.com/google/cargo-raze#generate-a-cargotoml) for this:
+Now lets make `$HOME/repo/third_party/rust/Cargo.toml` and follow the [instructions](https://github.com/google/cargo-raze#generate-a-cargotoml) for this:
 ```
 [package]
 name = "compile_with_bazel"
@@ -66,6 +78,9 @@ Now from the `$HOME/repo/third_party/rust` directory run cargo raze
 cd $HOME/repo/third_party/rust
 cargo raze
 ```
+
+> For some reason on my VM cargo raze failed and looking at the [cargo-raze code](https://github.com/google/cargo-raze/blob/v0.16.1/impl/src/rendering/bazel.rs#L78) it seems to be because a dummy directory is missing. I
+fixed this by running `mkdir -p "/tmp/cargo-raze/doesnt/exist/"` and then running `cargo raze` again.
 
 This should create a few different files in that directory, and a remote directory.
 The `$HOME/repo/third_party/rust/BUILD.bazel` file creates a new `:log` target which
@@ -161,7 +176,10 @@ rust_binary(
 )
 ```
 
-We'll try to build it before actually updating main.rs to use the code by running `bazel build //...`
+We'll try to build it before actually updating main.rs to use the code by running
+```shell
+bazel build //...
+```
 
 And it fails with output looking like:
 ```
