@@ -12,4 +12,4 @@
 - [Building Rust protobuf](./rust_protobuf.md)
 - [Rust gRPC Server](./04_rust_grpc_server_and_third_party_crates.md)
 - [Docker Container](./06_docker_container.md)
-- [Running on Google Cloud Run](./07_cloud_run.md)
+- [Pushing containers and running on Google Cloud](./07_cloud_run.md)
