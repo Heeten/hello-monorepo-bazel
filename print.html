@@ -1,0 +1,1547 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Using Bazel with Rust, gRPC, protobuf, and Docker</title>
+        <meta name="robots" content="noindex" />
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02_pre_reqs_install_bazel.html"><strong aria-hidden="true">2.</strong> Prerequisites and Installing Bazel</a></li><li class="chapter-item expanded "><a href="03a_create_repo_workspace.html"><strong aria-hidden="true">3.</strong> Create repository and bazel workspace</a></li><li class="chapter-item expanded "><a href="03b_rust_hello_world.html"><strong aria-hidden="true">4.</strong> Rust hello world</a></li><li class="chapter-item expanded "><a href="03c_rust_lib_unit_test.html"><strong aria-hidden="true">5.</strong> Rust Library</a></li><li class="chapter-item expanded "><a href="03d_rust_unit_test.html"><strong aria-hidden="true">6.</strong> Unit test Rust Library</a></li><li class="chapter-item expanded "><a href="03e_rust_linked_binary.html"><strong aria-hidden="true">7.</strong> Link rust binary to library</a></li><li class="chapter-item expanded "><a href="release_mode.html"><strong aria-hidden="true">8.</strong> '--release mode' builds</a></li><li class="chapter-item expanded "><a href="05_rust_cli_client_with_clap.html"><strong aria-hidden="true">9.</strong> Pulling in external crates like Clap</a></li><li class="chapter-item expanded "><a href="rust_protobuf.html"><strong aria-hidden="true">10.</strong> Building Rust protobuf</a></li><li class="chapter-item expanded "><a href="04_rust_grpc_server_and_third_party_crates.html"><strong aria-hidden="true">11.</strong> Rust gRPC Server</a></li><li class="chapter-item expanded "><a href="06_docker_container.html"><strong aria-hidden="true">12.</strong> Docker Container</a></li><li class="chapter-item expanded "><a href="07_cloud_run.html"><strong aria-hidden="true">13.</strong> Pushing containers and running on Google Cloud</a></li><li class="chapter-item expanded "><a href="conclusion.html"><strong aria-hidden="true">14.</strong> Conclusion</a></li><li class="chapter-item expanded "><a href="teardown.html"><strong aria-hidden="true">15.</strong> PS: Tearing down</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using Bazel with Rust, gRPC, protobuf, and Docker</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="using-bazel-with-rust-grpc-protobuf-and-docker"><a class="header" href="#using-bazel-with-rust-grpc-protobuf-and-docker">Using Bazel with Rust, gRPC, protobuf, and Docker</a></h1>
+<blockquote>
+<p><strong>NOTE</strong>: Buck2 was recently released and part of the motivation for this doc
+is providing a simple example of using Bazel and then replicating it with Buck2
+to learn how the two compare.</p>
+</blockquote>
+<p>This doc walks through creating a rust library (crate), rust binary, unit test, docker image, and Google Cloud run service
+using Bazel. When I started using Bazel for Rust that I ran into less roadblocks
+than I expected, but there were lots of speedbumps and I hope this walk-through helps with that.</p>
+<p>Bazel provides lots of flexability and in this doc I make certain choices on conventions for directory structure and
+crate naming that have worked for me, but they aren't the only way to do things and encourage you to choose what
+feels best to you.</p>
+<p>This doc won't cover when or why to use monorepos. There's a lot written on that. If cargo is working great for you,
+you probably don't need Bazel or Buck2. If you think you might want to explore that, this doc shows you how to get
+a functional setup in place.</p>
+<p>If you find any issues with this book please open a bug report at https://github.com/Heeten/hello-monorepo-bazel/issues</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="prerequisites-and-installing-bazel"><a class="header" href="#prerequisites-and-installing-bazel">Prerequisites and Installing Bazel</a></h1>
+<p>I'm going to start of with a minimal VM built on Google Cloud's Platform and walk through the process
+of installing and running Bazel on it. I do this so that these instructions are reproducible for people
+to follow along with and I don't accidently miss a step (like installing a C++ toolchain).</p>
+<p>Feel free to jump down to Step X which covers installing Bazelisk.</p>
+<h2 id="step-0-building-our-vm-and-connecting-to-it"><a class="header" href="#step-0-building-our-vm-and-connecting-to-it">Step 0: Building our VM and connecting to it</a></h2>
+<p>I'm going to use the gcloud CLI (<a href="https://cloud.google.com/sdk/docs/install">gcloud CLI instalation instructions</a>) to setup a VM on Google Cloud. If you already have a linux machine you can skip this.</p>
+<p>Log into Google Cloud and set the project</p>
+<pre><code class="language-shell">gcloud auth login
+gcloud config set project [PROJECT_ID]
+</code></pre>
+<p>Create a debian instance (Bazel of course works on all kinds of different environments, this is just the one I use for this doc).</p>
+<pre><code class="language-shell">gcloud compute instances create hellobazel \
+  --image-family debian-11 \
+  --image-project debian-cloud \
+  --zone us-central1-a \
+  --machine-type e2-standard-2 \
+  --boot-disk-size 20GB
+</code></pre>
+<p>Now lets connect to it</p>
+<pre><code class="language-shell">gcloud compute ssh hellobazel
+</code></pre>
+<h2 id="step-1-downloading-bazelisk-and-running"><a class="header" href="#step-1-downloading-bazelisk-and-running">Step 1: Downloading bazelisk and running</a></h2>
+<p>Now that we have a new machine we can mess around with, let's install Bazelisk.</p>
+<p>You can find the official Bazel install docs at <a href="https://bazel.build/install">https://bazel.build/install</a>.
+Those mention Bazelisk is the recommended way to install Bazel, which is what we'll use. Bazelisk is available
+as a binary you can download from their <a href="https://github.com/bazelbuild/bazelisk/releases">GitHub release page</a>.
+We're going to pull down the v1.16.0 binary by running:</p>
+<pre><code class="language-shell">mkdir bazel
+cd bazel
+curl \
+  -L https://github.com/bazelbuild/bazelisk/releases/download/v1.16.0/bazelisk-linux-amd64 \
+  -o bazel
+</code></pre>
+<p>Now let's make the file we just downloaded executable</p>
+<pre><code class="language-shell">chmod +x bazel
+</code></pre>
+<p>And add it to our path</p>
+<pre><code class="language-shell">export PATH=&quot;${PATH}:$HOME/bazel&quot;
+</code></pre>
+<p>Finally lets run <code>bazel</code> and see what happens. It should download something and then give you the Usage.
+Here's what I get</p>
+<pre><code class="language-shell">$ bazel
+2023/04/10 17:25:16 Downloading https://releases.bazel.build/6.1.1/release/bazel-6.1.1-linux-x86_64...
+WARNING: Invoking Bazel in batch mode since it is not invoked from within a workspace (below a directory having a WORKSPACE file).
+Extracting Bazel installation...
+                                                           [bazel release 6.1.1]
+Usage: bazel &lt;command&gt; &lt;options&gt; ...
+
+Available commands:
+  analyze-profile     Analyzes build profile data.
+  aquery              Analyzes the given targets and queries the action graph.
+  build               Builds the specified targets.
+  canonicalize-flags  Canonicalizes a list of bazel options.
+  clean               Removes output files and optionally stops the server.
+  coverage            Generates code coverage report for specified test targets.
+  cquery              Loads, analyzes, and queries the specified targets w/ configurations.
+  dump                Dumps the internal state of the bazel server process.
+  fetch               Fetches external repositories that are prerequisites to the targets.
+  help                Prints help for commands, or the index.
+  info                Displays runtime info about the bazel server.
+  license             Prints the license of this software.
+  mobile-install      Installs targets to mobile devices.
+  modquery            Queries the Bzlmod external dependency graph
+  print_action        Prints the command line args for compiling a file.
+  query               Executes a dependency graph query.
+  run                 Runs the specified target.
+  shutdown            Stops the bazel server.
+  sync                Syncs all repositories specified in the workspace file
+  test                Builds and runs the specified test targets.
+  version             Prints version information for bazel.
+
+Getting more help:
+  bazel help &lt;command&gt;
+                   Prints help and options for &lt;command&gt;.
+  bazel help startup_options
+                   Options for the JVM hosting bazel.
+  bazel help target-syntax
+                   Explains the syntax for specifying targets.
+  bazel help info-keys
+                   Displays a list of keys used by the info command.
+
+</code></pre>
+<p>Now that we have bazel working, let's start using it in the next chapter!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="create-repository-and-bazel-workspace"><a class="header" href="#create-repository-and-bazel-workspace">Create repository and bazel workspace</a></h1>
+<p>One of the benefits of Bazel is when you have a lot of different
+components/modules/crates/packages/whatever-you-call-it that need to connect together. In our example
+we're going to imagine there's a team that owns a rust summation() function and that they
+provide a rust interface and rust CLI to call these functions. Then we'll have downstream
+dependencies in C++ and Rust that use this summation() function.</p>
+<blockquote>
+<p><strong>NOTE</strong>: There are different ways to organize a monorepo. Bazel doesn't
+care which way you use, but sometimes IDEs do. In this example repo, we
+organize directories by project/team ownership and mix source files from different
+languages together. An alternate is to have the top-level directories
+be split by language (c++, rust, py, etc) or by project ang language.</p>
+</blockquote>
+<h2 id="create-repository"><a class="header" href="#create-repository">Create repository</a></h2>
+<p>We'll put our repository in the <code>$HOME/repo</code>. Let's go ahead and make that</p>
+<pre><code class="language-shell">mkdir $HOME/repo
+cd $HOME/repo
+</code></pre>
+<h2 id="create-workspace"><a class="header" href="#create-workspace">Create workspace</a></h2>
+<p>Bazel has a concept of workspace which I think of as the root of the monorepo. In the repo directory
+we'll create a file called <code>WORKSPACE</code> which we'll put repo wide configuration in for pulling
+down external dependencies. In this chapter the main external dependency we'll need is pulling down
+<a href="https://bazelbuild.github.io/rules_rust/">rules_rust</a> which contains the bazel rules for how to go from rust
+source files to libraries (crates) and binaries.</p>
+<p>Go ahead and open up <code>$HOME/repo/WORKSPACE</code> in your favorite text editors<sup class="footnote-reference"><a href="#note">1</a></sup> and put this in there. Bazel uses
+the Starlark language for configuration files, which is a dialect of Python.</p>
+<pre><code class="language-python"># This command tells bazel to load the http_archive rule which is used
+# to download other rulesets like rules_rust below
+load(&quot;@bazel_tools//tools/build_defs/repo:http.bzl&quot;, &quot;http_archive&quot;)
+
+# This pulls down rules_rust
+# The path and sha256 come from https://github.com/bazelbuild/rules_rust/releases
+http_archive(
+    name = &quot;rules_rust&quot;,
+    sha256 = &quot;950a3ad4166ae60c8ccd628d1a8e64396106e7f98361ebe91b0bcfe60d8e4b60&quot;,
+    urls = [&quot;https://github.com/bazelbuild/rules_rust/releases/download/0.20.0/rules_rust-v0.20.0.tar.gz&quot;],
+)
+
+#What to load and run to setup rust are documented at https://bazelbuild.github.io/rules_rust/
+load(&quot;@rules_rust//rust:repositories.bzl&quot;, &quot;rules_rust_dependencies&quot;, &quot;rust_register_toolchains&quot;)
+
+rules_rust_dependencies()
+
+rust_register_toolchains()
+</code></pre>
+<p>Once we've saved that file if we run <code>bazel</code> again we should see it doesn't output the <code>WARNING: Invoking Bazel in batch mode...</code> line.</p>
+<pre><code class="language-shell">$ bazel
+Starting local Bazel server and connecting to it...
+                                                           [bazel release 6.1.1]
+Usage: bazel &lt;command&gt; &lt;options&gt; ...
+
+Available commands:
+  analyze-profile     Analyzes build profile data.
+  aquery              Analyzes the given targets and queries the action graph.
+  build               Builds the specified targets.
+  canonicalize-flags  Canonicalizes a list of bazel options.
+  clean               Removes output files and optionally stops the server.
+  coverage            Generates code coverage report for specified test targets.
+  cquery              Loads, analyzes, and queries the specified targets w/ configurations.
+  dump                Dumps the internal state of the bazel server process.
+  fetch               Fetches external repositories that are prerequisites to the targets.
+  help                Prints help for commands, or the index.
+  info                Displays runtime info about the bazel server.
+  license             Prints the license of this software.
+  mobile-install      Installs targets to mobile devices.
+  modquery            Queries the Bzlmod external dependency graph
+  print_action        Prints the command line args for compiling a file.
+  query               Executes a dependency graph query.
+  run                 Runs the specified target.
+  shutdown            Stops the bazel server.
+  sync                Syncs all repositories specified in the workspace file
+  test                Builds and runs the specified test targets.
+  version             Prints version information for bazel.
+
+Getting more help:
+  bazel help &lt;command&gt;
+                   Prints help and options for &lt;command&gt;.
+  bazel help startup_options
+                   Options for the JVM hosting bazel.
+  bazel help target-syntax
+                   Explains the syntax for specifying targets.
+  bazel help info-keys
+                   Displays a list of keys used by the info command.
+</code></pre>
+<div class="footnote-definition" id="note"><sup class="footnote-definition-label">1</sup>
+<p>I installed emacs on the vm at this point with <code>sudo apt-get install emacs-nox</code></p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-hello-world"><a class="header" href="#rust-hello-world">Rust Hello World</a></h1>
+<p>First we'll create a &quot;hello world&quot; rust binary. Then we'll create the rust library and switch our rust binary to call it. We'll also create a unit test for our rust library.</p>
+<h1 id="hello-world-rust-binary"><a class="header" href="#hello-world-rust-binary">Hello world rust binary</a></h1>
+<p>Once we're done this chapter, this binary will print out a random number gint from 0 to a user provided arg. We'll start
+with just making sure we can build a rust binary and print hello world!.</p>
+<p>We're going to put all the summation related code in the directory <code>$HOME/repo/src/summation</code>, let's go ahead and make and cd
+that:</p>
+<pre><code class="language-shell">mkdir -p &quot;${HOME}/repo/src/summation&quot;
+cd &quot;${HOME}/repo/src/summation&quot;
+</code></pre>
+<h2 id="build-files"><a class="header" href="#build-files">BUILD files</a></h2>
+<p>Bazel uses <code>BUILD</code> files to describe all the &quot;targets&quot; (things that get built) in a directory, and the rules for how to
+build them. The rules_rust <a href="http://bazelbuild.github.io/rules_rust/defs.html#rust_binary">rust_binary</a> rule provides options you can set to control how things are built.</p>
+<blockquote>
+<p><strong>WARNING</strong>: Bazel aims for <a href="https://bazel.build/basics/hermeticity">hermetic builds</a>; code is built in a sandbox and
+configuration is stored in BUILD files, not environment variables. To pass rustc
+environment variables you set them in the BUILD file since setting environment variables won't pass
+through to the sandbox</p>
+</blockquote>
+<p>Open up <code>$HOME/repo/src/summation/BUILD</code> in your favorite text editor and lets setup the build rules for our binary.</p>
+<pre><code class="language-python"># This tells bazel to load the rust_binary rule from the rules_rust package
+load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_binary&quot;)
+
+rust_binary(
+    #We are going to call the target/binary summation
+    name = &quot;executable&quot;,
+    #The list of src files it needs (just main.rs)
+    srcs = [&quot;main.rs&quot;],
+    #Any libraries/crates it depends on, for now we'll leave this blank
+    deps = [],
+    #The crate_root file, this would default to main.rs but we put it in for clarity
+    crate_root = &quot;main.rs&quot;,
+)
+</code></pre>
+<p>Let's also create our <code>main.rs</code> file:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    println!(&quot;Hello world&quot;);
+}</code></pre></pre>
+<p>Now lets try to build it by running:</p>
+<pre><code class="language-shell">bazel build :executable
+</code></pre>
+<p>And it fails! If you get what I got you'll see something like:</p>
+<pre><code class="language-shell">$ bazel build :executable
+INFO: Repository local_config_cc instantiated at:
+  /DEFAULT.WORKSPACE.SUFFIX:509:13: in &lt;toplevel&gt;
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl:184:16: in cc_configure
+Repository rule cc_autoconf defined at:
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl:143:30: in &lt;toplevel&gt;
+ERROR: An error occurred during the fetch of repository 'local_config_cc':
+   Traceback (most recent call last):
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl&quot;, line 125, column 33, in cc_autoconf_impl
+                configure_unix_toolchain(repository_ctx, cpu_value, overriden_tools)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl&quot;, line 349, column 17, in configure_unix_toolchain
+                cc = find_cc(repository_ctx, overriden_tools)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl&quot;, line 314, column 23, in find_cc
+                cc = _find_generic(repository_ctx, &quot;gcc&quot;, &quot;CC&quot;, overriden_tools)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl&quot;, line 310, column 32, in _find_generic
+                auto_configure_fail(msg)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/lib_cc_configure.bzl&quot;, line 112, column 9, in auto_configure_fail
+                fail(&quot;\n%sAuto-Configuration Error:%s %s\n&quot; % (red, no_color, msg))
+Error in fail:
+Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
+ERROR: /DEFAULT.WORKSPACE.SUFFIX:509:13: fetching cc_autoconf rule //external:local_config_cc: Traceback (most recent call last):
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/cc_configure.bzl&quot;, line 125, column 33, in cc_autoconf_impl
+                configure_unix_toolchain(repository_ctx, cpu_value, overriden_tools)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl&quot;, line 349, column 17, in configure_unix_toolchain
+                cc = find_cc(repository_ctx, overriden_tools)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl&quot;, line 314, column 23, in find_cc
+                cc = _find_generic(repository_ctx, &quot;gcc&quot;, &quot;CC&quot;, overriden_tools)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/unix_cc_configure.bzl&quot;, line 310, column 32, in _find_generic
+                auto_configure_fail(msg)
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/cpp/lib_cc_configure.bzl&quot;, line 112, column 9, in auto_configure_fail
+                fail(&quot;\n%sAuto-Configuration Error:%s %s\n&quot; % (red, no_color, msg))
+Error in fail:
+Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
+INFO: Repository rust_linux_x86_64__x86_64-unknown-linux-gnu__stable_tools instantiated at:
+  /home/parallels/repo/WORKSPACE:18:25: in &lt;toplevel&gt;
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:203:14: in rust_register_toolchains
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/bazel_tools/tools/build_defs/repo/utils.bzl:233:18: in maybe
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:874:65: in rust_repository_set
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:496:36: in rust_toolchain_repository
+Repository rule rust_toolchain_tools_repository defined at:
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/repositories.bzl:333:50: in &lt;toplevel&gt;
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: //src/summation:executable depends on @local_config_cc//:cc-compiler-k8 in repository @local_config_cc which failed to fetch. no such package '@local_config_cc//':
+Auto-Configuration Error: Cannot find gcc or CC; either correct your path or set the CC environment variable
+ERROR: Analysis of target '//src/summation:executable' failed; build aborted: Analysis failed
+INFO: Elapsed time: 8.170s
+INFO: 0 processes.
+FAILED: Build did NOT complete successfully (93 packages loaded, 187 targets configured)
+    Fetching https://static.rust-lang.org/dist/rustc-1.68.1-x86_64-unknown-linux-gnu.tar.gz
+</code></pre>
+<p>For most dependencies, you'll tell Bazel where to find them and it'll pull them down for you.
+One exception is the C++ toolchain, which rules_rust depends on. To get around this we can install
+the build-essential package on debian which includes gcc, g++, and libc.</p>
+<pre><code class="language-shell">sudo apt-get install build-essential
+</code></pre>
+<p>Once you've installed that let's try <code>bazel build :executable</code> again and see what happens</p>
+<pre><code class="language-shell">$ bazel build :executable
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: in rust_binary rule //src/summation:executable:
+Traceback (most recent call last):
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/private/rust.bzl&quot;, line 351, column 34, in _rust_binary_impl
+                edition = get_edition(ctx.attr, toolchain, ctx.label),
+        File &quot;/home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/external/rules_rust/rust/private/rust.bzl&quot;, line 125, column 13, in get_edition
+                fail(&quot;Attribute `edition` is required for {}.&quot;.format(label))
+Error in fail: Attribute `edition` is required for @//src/summation:executable.
+ERROR: /home/parallels/repo/src/summation/BUILD:4:12: Analysis of target '//src/summation:executable' failed
+ERROR: Analysis of target '//src/summation:executable' failed; build aborted:
+INFO: Elapsed time: 17.253s
+INFO: 0 processes.
+FAILED: Build did NOT complete successfully (9 packages loaded, 325 targets configured)
+</code></pre>
+<p>This time it fails again saying we didn't set the edition. We could manually set the edition on the rule, but that's kind of annoying if we want to use the same edition across the repo, so lets open up our <code>$HOME/repo/WORKSPACE</code> file and specify
+an edition on the <code>rust_register_toolchains()</code> call by changing it to:</p>
+<pre><code class="language-python">rust_register_toolchains(edition = &quot;2021&quot;)
+</code></pre>
+<p>Hopefully the third time is a charm? Let's see what <code>bazel build :executable</code> does this time:</p>
+<pre><code class="language-shell">$ bazel build :executable
+INFO: Analyzed target //src/summation:executable (1 packages loaded, 60 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 16.776s, Critical Path: 5.44s
+INFO: 94 processes: 91 internal, 3 linux-sandbox.
+INFO: Build completed successfully, 94 total actions
+</code></pre>
+<p>Success! Now before we get up for a coffee break lets just make sure it actually runs. You can use the <code>bazel run</code>
+subcommand to run the binary.</p>
+<pre><code class="language-shell">$ bazel run :executable
+INFO: Analyzed target //src/summation:executable (24 packages loaded, 172 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 0.455s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/src/summation/executable
+Hello world
+</code></pre>
+<p>It worked! One thing to note is this ran it inside bazel, and it output a bunch of bazel log messages. The second
+to last line of the output says <code>INFO: Running command line: bazel-bin/src/summation/executable</code>.</p>
+<p>What is that? Let's go to the repo directory and see:</p>
+<pre><code class="language-shell">$ ls -l $HOME/repo
+total 28
+-rw-r--r-- 1 parallels parallels  798 Apr 20 14:40 WORKSPACE
+-rw-r--r-- 1 parallels parallels  782 Apr 20 14:36 WORKSPACE~
+lrwxrwxrwx 1 parallels parallels  123 Apr 20 14:40 bazel-bin -&gt; /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/bin
+lrwxrwxrwx 1 parallels parallels  106 Apr 20 14:40 bazel-out -&gt; /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out
+lrwxrwxrwx 1 parallels parallels   96 Apr 20 14:40 bazel-repo -&gt; /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__
+lrwxrwxrwx 1 parallels parallels  128 Apr 20 14:40 bazel-testlogs -&gt; /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs
+drwxr-xr-x 3 parallels parallels 4096 Apr 20 14:37 src
+</code></pre>
+<p>You can see bazel created a bunch of symlinks to a mysterious <code>.cache/bazel</code> directory. When you run bazel, it caches build artifacts to avoid rebuilding things that didn't change, and these symlinks give us a way to access the artifacts bazel
+produces. If we want, we can run the binary directly by running <code>$HOME/repo/bazel-bin/src/summation/executable</code>. Let's try that:</p>
+<pre><code class="language-shell">$ $HOME/repo/bazel-bin/src/summation/executable
+Hello world
+</code></pre>
+<p>Now we see the output of the binary without any of the bazel messages because we are invoking it directly.</p>
+<p>With this we've successfully configured bazel to compile rust and get a binary out. When we're back from our coffee break we'll add in a C++ library, make a rust crate that links to it, and make our Hello world program call the rust crate.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-library"><a class="header" href="#rust-library">Rust library</a></h1>
+<p>Now that we have hello world let's do something more real by creating a library (crate), unit testing it, and making our binary call it.</p>
+<h2 id="creating-the-library"><a class="header" href="#creating-the-library">Creating the library</a></h2>
+<p>We're going to use multiple files for our trivial library to demonstrate how that is handled in Bazel.</p>
+<p>One thing we'll need to think about is what we want the crate name to be. In the C++ code above you can see that the header file location is based on the path to the
+file in the repo. If we had Java files, we'd also see this there, where package names are nested and based on their
+path.</p>
+<p>To make something that resembles this for Rust crate names in the monorepo I've decided to name my crates based
+on the path to them. I also have them all have the same top-level prefix to ensure I avoid classes with third-party
+crates. This also makes it easy for me to see a crate name in a source file (like in a use statement) and know
+where to find it in the monorepo.</p>
+<p>Having settled the naming delima let's add the library to <code>$HOME/repo/src/summation/BUILD</code> by adding these lines to the file (the name attribute is what the crate name defaults to):</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_library&quot;)
+rust_library(
+    name = &quot;src_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+        &quot;f64.rs&quot;,
+        &quot;u32.rs&quot;,
+    ],
+    deps = [],
+)
+</code></pre>
+<p>We have to list all the files we want to compile against here. Otherwise Bazel won't copy them into the sandbox where our library is compiled.
+I like listing all the files explictly, but if you want to include all &quot;*.rs&quot; files Bazel provides a <a href="https://bazel.build/reference/be/functions#glob">glob()</a> to do this.</p>
+<p>Now let's make <code>$HOME/repo/src/summation/lib.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub mod f64;
+pub mod u32;
+<span class="boring">}</span></code></pre></pre>
+<p>If we don't have the <code>mod</code> lines, when bazel runs rustc it'll ignore the f64.rs and u32.rs files since rustc uses the crate root source file to figure out what to compile.
+Including them in the <code>BUILD</code> file gets them copied over to the sandbox <code>rustc</code> is run in, adding them to <code>lib.rs</code> gets rustc to compile them.</p>
+<p>And lets make <code>$HOME/repo/src/summation/f64.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn summation_f64(values: &amp;[f64]) -&gt; f64 {
+    values.iter().sum()
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Wow, that's a boring function. Clearly I picked a simple example. Let's make a boring <code>$HOME/repo/src/summation/u32.rs</code> file as well:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn summation_u32(values: &amp;[u32]) -&gt; u32 {
+    values.iter().sum()
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Now let's build it. From anywhere in the workspace we can build this using it's full path:</p>
+<pre><code class="language-shell">bazel build //src/summation:src_summation
+</code></pre>
+<p>The <code>//</code> maps to the root of the workspace which is <code>$HOME/repo</code> in our example, <code>//src/summation</code> says we are talking about that path from the workspace root,
+and then <code>src_summation</code> is the target inside the build file that we are trying to build. If we're already in <code>$HOME/repo/src/summation</code> we can omit the path
+and just use <code>bazel build :src_summation</code> for short.</p>
+<p>We can also run <code>bazel build :all</code> to build all the targets in the directory we are in. This should be a no-op if you manually built the executable and lib already
+since none of the source files have changed so bazel just uses the cached build and doesn't need to remake them.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="unit-test-rust-library"><a class="header" href="#unit-test-rust-library">Unit test rust library</a></h1>
+<p>To add tests to our rust library we'll use the rules_rust <a href="https://bazelbuild.github.io/rules_rust/defs.html#rust_test">rust_test</a> rule. We can test in our library source files or seperate out testing into their own files. In this case since our unit tests are simple we'll put them in the same source files as the functions they are testing.</p>
+<p>Let's add the rule to <code>$HOME/repo/src/summation/BUILD</code> by adding these lines:</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_test&quot;)
+rust_test(
+    name = &quot;lib_test&quot;,
+    crate = &quot;:src_summation&quot;,
+    deps = [],
+)
+</code></pre>
+<p>We can also combine all the <code>load</code> lines into one, consolidating them into this at the top of <code>BUILD</code>:</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_binary&quot;, &quot;rust_library&quot;, &quot;rust_test&quot;)
+</code></pre>
+<p>Now we can run it. Bazel can automatically detect and rerun all the applicable tests that might be affected
+by a change, and I usually run <code>bazel test //...</code> which says run all the tests when I'm testing.
+If you run it you should see something like</p>
+<pre><code class="language-shell">INFO: Analyzed 3 targets (2 packages loaded, 156 targets configured).
+INFO: Found 2 targets and 1 test target...
+INFO: Elapsed time: 0.874s, Critical Path: 0.34s
+INFO: 5 processes: 2 internal, 3 linux-sandbox.
+INFO: Build completed successfully, 5 total actions
+//src/summation:lib_test                                                 PASSED in 0.0s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+</code></pre>
+<p>You can see it &quot;ran&quot; our tests but right now we haven't defined any tests so it's a bit of no-op.
+Let's add some test that we expect to fail and see what happens.
+We'll add this to <code>$HOME/repo/src/summation/f64.rs</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn summation_f64(values: &amp;[f64]) -&gt; f64 {
+    values.iter().sum()
+}
+
+#[cfg(test)]
+mod test {
+    use super::summation_f64;
+
+    #[test]
+    fn simple_test() {
+        let res = summation_f64(&amp;[0.0, 1.0,  2.0]);
+        assert_eq!(res, 0.0);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>And run <code>bazel test //...</code> again:</p>
+<pre><code class="language-shell">INFO: Analyzed 3 targets (0 packages loaded, 0 targets configured).
+INFO: Found 2 targets and 1 test target...
+FAIL: //src/summation:lib_test (see /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs/src/summation/lib_test/test.log)
+INFO: Elapsed time: 0.604s, Critical Path: 0.40s
+INFO: 4 processes: 4 linux-sandbox.
+INFO: Build completed, 1 test FAILED, 4 total actions
+//src/summation:lib_test                                                 FAILED in 0.0s
+  /home/parallels/.cache/bazel/_bazel_parallels/db6a46b6510c6ee4dba1a9500854830b/execroot/__main__/bazel-out/k8-fastbuild/testlogs/src/summation/lib_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.
+</code></pre>
+<p>Ok we can see our test failed. Bazel also gives us the path to the <code>test.log</code> file. If we look at that it contains:</p>
+<pre><code>exec ${PAGER:-/usr/bin/less} &quot;$0&quot; || exit 1
+Executing tests from //src/summation:lib_test
+-----------------------------------------------------------------------------
+
+running 1 test
+test f64::test::simple_test ... FAILED
+
+failures:
+
+---- f64::test::simple_test stdout ----
+thread 'f64::test::simple_test' panicked at 'assertion failed: `(left == right)`
+  left: `3.0`,
+ right: `0.0`', src/summation/f64.rs:12:9
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    f64::test::simple_test
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+</code></pre>
+<p>So we can see our test failed because 3.0 does not equal 0.0. Let's fix the test by changing the <code>assert_eq!(res, 0.0);</code> to <code>assert_eq!(res, 3.0);</code> and rerun:</p>
+<pre><code class="language-shell">$ bazel test //...
+INFO: Analyzed 3 targets (0 packages loaded, 0 targets configured).
+INFO: Found 2 targets and 1 test target...
+INFO: Elapsed time: 0.595s, Critical Path: 0.42s
+INFO: 4 processes: 4 linux-sandbox.
+INFO: Build completed successfully, 4 total actions
+//src/summation:lib_test                                                 PASSED in 0.0s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+</code></pre>
+<p>Looks like our tests are working! Next lets make the CLI call our library.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="link-rust-binary-to-library"><a class="header" href="#link-rust-binary-to-library">Link rust binary to library</a></h1>
+<p>Now that we have our library, lets make our rust binary use it.</p>
+<p>First we'll update the <code>$HOME/repo/src/summation/BUILD</code> and add <code>&quot;:src_summation&quot;</code> to the rust_binary deps, which tells Bazel to pull that crate into the sandbox our target is built in. The full <code>BUILD</code> file after this will look like:</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_binary&quot;, &quot;rust_library&quot;, &quot;rust_test&quot;)
+
+rust_binary(
+    #We are going to call the target/binary summation
+    name = &quot;executable&quot;,
+    #The list of src files it needs (just main.rs)
+    srcs = [&quot;main.rs&quot;],
+    #Any libraries/crates it depends on, for now we'll leave this blank
+    deps = [
+        &quot;:src_summation&quot;,
+    ],
+    #The crate_root file, this would default to main.rs but we put it in for clarity
+    crate_root = &quot;main.rs&quot;,
+)
+
+rust_library(
+    name = &quot;src_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+        &quot;f64.rs&quot;,
+        &quot;u32.rs&quot;,
+    ],
+    deps = [],
+)
+
+rust_test(
+    name = &quot;lib_test&quot;,
+    crate = &quot;:src_summation&quot;,
+    deps = [],
+)
+</code></pre>
+<p>Next let's update <code>$HOME/repo/src/summation/main.rs</code> to use our crate. We'll have it parse command line arguments
+as <code>f64</code> and then sum all of them.</p>
+<pre><pre class="playground"><code class="language-rust">use src_summation::f64::summation_f64;
+use std::env;
+
+fn main() {
+    let args: Vec&lt;f64&gt; = env::args().skip(1).map(|a| a.parse().unwrap()).collect();
+    println!(&quot;sum = {}&quot;, summation_f64(&amp;args))
+}
+</code></pre></pre>
+<p>Now lets build and run it:</p>
+<pre><code class="language-shell">$ bazel run //src/summation:executable
+INFO: Analyzed target //src/summation:executable (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 0.405s, Critical Path: 0.28s
+INFO: 2 processes: 1 internal, 1 linux-sandbox.
+INFO: Build completed successfully, 2 total actions
+INFO: Running command line: bazel-bin/src/summation/executable
+sum = 0
+</code></pre>
+<p>Let's try running it with some arguments. We'll use <code>--</code> to seperate arguments to bazel run and arguments
+to our binary (we'll also omit some bazel log statements):</p>
+<pre><code class="language-shell">$ bazel run //src/summation:executable -- 1 2 3.0
+sum = 6
+</code></pre>
+<p>Finally, let's run with an <code>optimized</code> binary by adding <code>-c opt</code>, getting something equivilant to running with <code>--release</code> in cargo:</p>
+<pre><code class="language-shell">$ bazel run -c opt //src/summation:executable -- 1 2 3.0
+INFO: Build option --compilation_mode has changed, discarding analysis cache.
+INFO: Analyzed target //src/summation:executable (0 packages loaded, 517 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 1.278s, Critical Path: 0.55s
+INFO: 48 processes: 46 internal, 2 linux-sandbox.
+INFO: Build completed successfully, 48 total actions
+INFO: Running command line: bazel-bin/src/summation/executable 1 2 3.0
+sum = 6
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="release-mode-builds"><a class="header" href="#release-mode-builds">'Release mode' builds</a></h1>
+<p>In bazel instead of passing <code>--release</code> you need to set the <a href="https://bazel.build/docs/user-manual#compilation-mode">compilation-mode</a>, which is a command-line option you can set that affects both the rust and c++ compilation in our example repo. When you run <code>bazel build</code> or <code>bazel run</code> you'll want to use this flag to get compiler optimizations turned on.</p>
+<pre><code class="language-shell">#Compiles everything with optimization enabled
+bazel build -c opt //...
+</code></pre>
+<pre><code class="language-shell">#Runs out example CLI from a build with optimization enabled
+bazel run -c opt //src/summation:executable
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pulling-in-external-crates-like-clap"><a class="header" href="#pulling-in-external-crates-like-clap">Pulling in external crates like Clap</a></h1>
+<p>We'll use <a href="https://github.com/google/cargo-raze">cargo raze</a>. There's a newer alternate way to pull crates.io crates
+into bazel using <a href="http://bazelbuild.github.io/rules_rust/crate_universe.html">crate universe</a> that we don't cover here.
+With cargo raze you create a <code>Cargo.toml</code> file to specify the crates.io crates you will depend on and use the
+<code>raze</code> extension to create Bazel rules for compiling each of these. The dependencies can be vendored, but we'll
+use the non-vendored mode in the examples below.</p>
+<p>If you're starting from our blank VM we'll need to install rust and cargo. Using <a href="https://doc.rust-lang.org/cargo/getting-started/installation.html">The Cargo Book</a> instructions:</p>
+<pre><code class="language-shell">curl https://sh.rustup.rs -sSf | sh
+</code></pre>
+<p>Add cargo to the path:</p>
+<pre><code class="language-shell">source &quot;$HOME/.cargo/env&quot;
+</code></pre>
+<p>Next lets install <code>cargo raze</code></p>
+<pre><code class="language-shell">cargo install cargo-raze
+</code></pre>
+<p>If you're using the VM we setup, that failed saying <code>The pkg-config command could not be found</code> and also complaining about open ssl. Let's fix that and try
+again:</p>
+<pre><code class="language-shell">sudo apt install pkg-config libssl-dev
+cargo install cargo-raze
+</code></pre>
+<p>Now that we have Cargo and cargo-raze, lets put our third-party rust dependencies under the <code>//third_party/rust</code> path in our repo. First let's make that
+directory:</p>
+<pre><code class="language-shell">mkdir $HOME/repo/third_party
+mkdir $HOME/repo/third_party/rust
+</code></pre>
+<p>Now lets make <code>$HOME/repo/third_party/rust/Cargo.toml</code> and follow the <a href="https://github.com/google/cargo-raze#generate-a-cargotoml">instructions</a> for this:</p>
+<pre><code>[package]
+name = &quot;compile_with_bazel&quot;
+version = &quot;0.0.0&quot;
+
+# Mandatory (or Cargo tooling is unhappy)
+[lib]
+path = &quot;fake_lib.rs&quot;
+
+[dependencies]
+log = &quot;0.4.17&quot;
+
+[package.metadata.raze]
+# The path at which to write output files.
+#
+# `cargo raze` will generate Bazel-compatible BUILD files into this path.
+# This can either be a relative path (e.g. &quot;foo/bar&quot;), relative to this
+# Cargo.toml file; or relative to the Bazel workspace root (e.g. &quot;//foo/bar&quot;).
+workspace_path = &quot;//third_party/rust&quot;
+
+# This causes aliases for dependencies to be rendered in the BUILD
+# file located next to this `Cargo.toml` file.
+package_aliases_dir = &quot;.&quot;
+
+# The set of targets to generate BUILD rules for.
+targets = [
+    &quot;x86_64-unknown-linux-gnu&quot;,
+]
+
+# The two acceptable options are &quot;Remote&quot; and &quot;Vendored&quot; which
+# is used to indicate whether the user is using a non-vendored or
+# vendored set of dependencies.
+genmode = &quot;Remote&quot;
+
+default_gen_buildrs = true
+</code></pre>
+<p>Now from the <code>$HOME/repo/third_party/rust</code> directory run cargo raze</p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust
+cargo raze
+</code></pre>
+<blockquote>
+<p>For some reason on my VM cargo raze failed and looking at the <a href="https://github.com/google/cargo-raze/blob/v0.16.1/impl/src/rendering/bazel.rs#L78">cargo-raze code</a> it seems to be because a dummy directory is missing. I
+fixed this by running <code>mkdir -p &quot;/tmp/cargo-raze/doesnt/exist/&quot;</code> and then running <code>cargo raze</code> again.</p>
+</blockquote>
+<p>This should create a few different files in that directory, and a remote directory.
+The <code>$HOME/repo/third_party/rust/BUILD.bazel</code> file creates a new <code>:log</code> target which
+allows you to depend on the log crate. We can add <code>//third_party/rust:log</code> to the <code>deps</code>
+attribute of our <code>rust_library</code> and <code>rust_binary</code> rules to pull in the <code>log</code> crate.</p>
+<p>We also need to update <code>$HOME/repo/WORKSPACE</code> to pull down the remote crates. Add this to the
+bottom of <code>WORKSPACE</code>:</p>
+<pre><code class="language-python">### Cargo raze deps
+###
+load(&quot;//third_party/rust:crates.bzl&quot;, &quot;raze_fetch_remote_crates&quot;)
+
+# Note that this method's name depends on your gen_workspace_prefix setting.
+# `raze` is the default prefix.
+raze_fetch_remote_crates()
+</code></pre>
+<p>Let's add <code>log</code> to our library by editing <code>$HOME/repo/src/summation/BUILD</code> and updating
+the rust_library deps to say:</p>
+<pre><code class="language-python">rust_library(
+    name = &quot;src_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+        &quot;f64.rs&quot;,
+        &quot;u32.rs&quot;,
+    ],
+    deps = [&quot;//third_party/rust:log&quot;],
+)
+</code></pre>
+<p>Now lets use <code>log</code> in <code>f64.rs</code> by changing the top of the file to this:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use log::trace;
+
+pub fn summation_f64(values: &amp;[f64]) -&gt; f64 {
+    trace!(&quot;summation_f64&quot;);
+    values.iter().sum()
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Then lets rebuild and see what happens:</p>
+<pre><code class="language-shell">$ bazel build //...
+INFO: Analyzed 5 targets (5 packages loaded, 43 targets configured).
+INFO: Found 5 targets...
+INFO: Elapsed time: 2.326s, Critical Path: 1.91s
+INFO: 14 processes: 5 internal, 9 linux-sandbox.
+INFO: Build completed successfully, 14 total actions
+</code></pre>
+<p>You should see some output showing it's pulling down the third party crates and then everything compiles.</p>
+<h2 id="adding-clap"><a class="header" href="#adding-clap">Adding Clap</a></h2>
+<p>Now let's add clap. We'll see there's a gotcha we need to deal with for that crate due to Bazel's sandboxing.</p>
+<p>First we'll add Clap along with the <code>derive</code> featur to <code>$HOME/repo/third_party/rust/Cargo.toml</code> under the <code>[dependencies]</code> section:</p>
+<pre><code>[dependencies]
+log = &quot;0.4.17&quot;
+clap = { version = &quot;4.2.2&quot;, features = [&quot;derive&quot;] }
+</code></pre>
+<p>Then lets rerun <code>cargo raze</code> from <code>$HOME/repo/third_party/rust</code></p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust
+cargo raze
+</code></pre>
+<p>You might see a warning about needing to run <code>cargo generate-lockfile</code>. We can delete <code>Cargo.raze.lock</code> and rerun
+cargo raze to update versions of packages and create a new lockfile.</p>
+<pre><code class="language-shell">rm Cargo.raze.lock
+cargo raze
+</code></pre>
+<p>Now lets go back to <code>$HOME/repo/src/summation/BUILD</code> and add <code>&quot;//third_party/rust:log&quot;</code> to our binary <code>deps</code>, resulting
+in:</p>
+<pre><code class="language-python">rust_binary(
+    #We are going to call the target/binary summation
+    name = &quot;executable&quot;,
+    #The list of src files it needs (just main.rs)
+    srcs = [&quot;main.rs&quot;],
+    #Any libraries/crates it depends on, for now we'll leave this blank
+    deps = [
+        &quot;:src_summation&quot;,
+        &quot;//third_party/rust:clap&quot;,
+    ],
+    #The crate_root file, this would default to main.rs but we put it in for clarity
+    crate_root = &quot;main.rs&quot;,
+)
+</code></pre>
+<p>We'll try to build it before actually updating main.rs to use the code by running</p>
+<pre><code class="language-shell">bazel build //...
+</code></pre>
+<p>And it fails with output looking like:</p>
+<pre><code>INFO: Analyzed 5 targets (18 packages loaded, 806 targets configured).
+INFO: Found 5 targets...
+ERROR: /home/parallels/.cache/bazel/_bazel_parallels/8136e33dd0c038f4f223262d62801c45/external/raze__clap_builder__4_2_2/BUILD.bazel:34:13: Compiling Rust rlib clap_builder v4.2.2 (54 files) failed: (Exit 1): process_wrapper failed: error executing command (from target @raze__clap_builder__4_2_2//:clap_builder) bazel-out/k8-opt-exec-2B5CBBC6/bin/external/rules_rust/util/process_wrapper/process_wrapper --arg-file ... (remaining 57 arguments skipped)
+
+Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
+error: couldn't read external/raze__clap_builder__4_2_2/src/../README.md: No such file or directory (os error 2)
+ --&gt; external/raze__clap_builder__4_2_2/src/lib.rs:7:10
+  |
+7 | #![doc = include_str!(&quot;../README.md&quot;)]
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `include_str` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aborting due to previous error
+
+INFO: Elapsed time: 5.310s, Critical Path: 4.04s
+INFO: 29 processes: 8 internal, 21 linux-sandbox.
+FAILED: Build did NOT complete successfully
+</code></pre>
+<p>What's going on here? It's hard to believe the clap release from crates.io doesn't build, but that's what Bazel tells us.
+If you look at the error, you see it's using the <code>include_str!</code> macro not being able to find <code>../README.md</code>. Back in the hello world chapter we mentioned Bazel tries to ensure <a href="https://bazel.build/basics/hermeticity">hermetic builds</a> by compiling code in a sandbox. One goal of the sandbox is to ensure you can't depend on anything that you haven't told Bazel explictly about. By default, cargo raze tells Bazel to bring over all the <code>*.rs</code> files, but it doesn't specify the compile needs  <code>README.md</code>. We can set an option to tell it we need this by adding these lines to <code>$HOME/repo/third_party/rust/Cargo.toml</code>:</p>
+<pre><code>[package.metadata.raze.crates.clap.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.clap_builder.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.clap_derive.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+</code></pre>
+<p>Then let's run cargo raze again to get it to regen the third party crate build files.</p>
+<pre><code class="language-shell">cargo raze
+</code></pre>
+<p>And try building again</p>
+<pre><code class="language-shell">bazel build //...
+</code></pre>
+<p>At this point it should have built and you should be able to run your executable:</p>
+<pre><code class="language-shell">bazel run //src/summation:executable -- 0.0 1.0 2.0
+</code></pre>
+<p>That should output <code>sum = 3</code>. For completeness let's open up <code>$HOME/repo/src/summation/main.rs</code> and use clap
+to parse the args. The final code we'll end up there will be:</p>
+<pre><pre class="playground"><code class="language-rust">use clap::{Parser, Subcommand};
+use src_summation::f64::summation_f64;
+use src_summation::u32::summation_u32;
+
+#[derive(Subcommand)]
+enum Cmd {
+    U32 { args: Vec&lt;String&gt; },
+    F64 { args: Vec&lt;String&gt; },
+}
+
+#[derive(Parser)]
+struct Arguments {
+    #[command(subcommand)]
+    cmd: Cmd,
+}
+
+fn main() {
+    let args = Arguments::parse();
+    match args.cmd {
+        Cmd::U32 { args } =&gt; {
+            let args: Vec&lt;u32&gt; = args.into_iter().map(|a| a.parse().unwrap()).collect();
+            println!(&quot;sum = {}&quot;, summation_u32(&amp;args))
+        }
+        Cmd::F64 { args } =&gt; {
+            let args: Vec&lt;f64&gt; = args.into_iter().map(|a| a.parse().unwrap()).collect();
+            println!(&quot;sum = {}&quot;, summation_f64(&amp;args))
+        }
+    }
+}</code></pre></pre>
+<p>Which we can run and get the help usage for by running:</p>
+<pre><code class="language-shell">bazel run //src/summation:executable -- --help
+</code></pre>
+<p>Which shows us:</p>
+<pre><code>WARNING: Ignoring JAVA_HOME, because it must point to a JDK, not a JRE.
+INFO: Analyzed target //src/summation:executable (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 0.104s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/src/summation/executable --help
+Usage: executable &lt;COMMAND&gt;
+
+Commands:
+  u32
+  f64
+  help  Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help  Print help
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="building-rust-protobuf"><a class="header" href="#building-rust-protobuf">Building Rust protobuf</a></h1>
+<p>Generating code for protobufs in rust is a lot more complicated than other languages. We'll cover how to do both.</p>
+<p>We'll start with other language support since that includes pulling down the protoc compiler which we'll also
+need for rust.</p>
+<h2 id="creating-the-protofile"><a class="header" href="#creating-the-protofile">Creating the protofile</a></h2>
+<p>Lets decide where we want to put our protobuf file. Bazel doesn't care where we put it,
+so I'm going to arbitarly pick <code>//src/proto/summation</code> as the path for it.</p>
+<p>Let's put to protobuf file in <code>$HOME/repo/src/proto/summation/summation.proto</code> with these contents</p>
+<pre><code>syntax = &quot;proto3&quot;;
+
+package src_proto_summation;
+
+service Summation {
+  rpc ComputeSumF64(ComputeSumF64Request) returns (ComputeSumF64Response);
+}
+
+message ComputeSumF64Request {
+  repeated double value = 1;
+}
+
+message ComputeSumF64Response {
+  double sum = 1;
+}
+</code></pre>
+<p>Our package name above is unconventional, we are using underscores instead of dots. This is to match
+the crate naming convention we adopted for rust libraries.</p>
+<h2 id="adding-rules_proto-for-protobuf-generation-in-protoc-supported-languages"><a class="header" href="#adding-rules_proto-for-protobuf-generation-in-protoc-supported-languages">Adding rules_proto for protobuf generation in protoc supported languages</a></h2>
+<p>We're going to use the bazel rules from <a href="https://github.com/bazelbuild/rules_proto">rules_proto</a>.
+Let's pull this down by adding this section to our <code>$HOME/repo/WORKSPACE</code> file:</p>
+<pre><code class="language-python">### rules_proto
+### Release info from https://github.com/bazelbuild/rules_proto/releases
+http_archive(
+    name = &quot;rules_proto&quot;,
+    sha256 = &quot;dc3fb206a2cb3441b485eb1e423165b231235a1ea9b031b4433cf7bc1fa460dd&quot;,
+    strip_prefix = &quot;rules_proto-5.3.0-21.7&quot;,
+    urls = [
+        &quot;https://github.com/bazelbuild/rules_proto/archive/refs/tags/5.3.0-21.7.tar.gz&quot;,
+    ],
+)
+load(&quot;@rules_proto//proto:repositories.bzl&quot;, &quot;rules_proto_dependencies&quot;, &quot;rules_proto_toolchains&quot;)
+rules_proto_dependencies()
+rules_proto_toolchains()
+</code></pre>
+<p>Next lets make <code>$HOME/repo/src/proto/summation/BUILD</code>:</p>
+<pre><code class="language-python">load(&quot;@rules_proto//proto:defs.bzl&quot;, &quot;proto_library&quot;)
+
+proto_library(
+    name = &quot;proto&quot;,
+    srcs = [
+        &quot;summation.proto&quot;,
+    ],
+    visibility = [&quot;//visibility:public&quot;],
+)
+</code></pre>
+<p>Finally run <code>bazel build //...</code> to build everything.</p>
+<h2 id="protobuf-generation-in-rust"><a class="header" href="#protobuf-generation-in-rust">Protobuf generation in Rust</a></h2>
+<p>We're going to use <a href="https://github.com/hyperium/tonic">tonic</a> for our gRPC server and use tonic_build to generate the protobuf and gRPC code.</p>
+<h3 id="pulling-in-tonic-tonic_build-and-prost"><a class="header" href="#pulling-in-tonic-tonic_build-and-prost">Pulling in tonic, tonic_build, and prost</a></h3>
+<p>Do generate and compile the protobuf and gRPC code we'll need to explictly expose the tonic, tonic_build, and prost crates.</p>
+<p>When we pull down tonic we'll enable the tls features, even though we won't use them (yet) in this guide. We'll also need
+to tell bazel that the compile depends on <code>*.md</code> files for prost, and some other files for other transitive dependencies (which
+we don't explictly pull down but it an implicit dependency pulled down).</p>
+<p>So we'll add the following under <code>[dependencies]</code>:</p>
+<pre><code class="language-toml">prost = &quot;0.11.6&quot;
+tonic = { version = &quot;0.9.1&quot;, features = [&quot;tls&quot;, &quot;tls-roots&quot;, &quot;default&quot;] }
+tonic-build = &quot;0.9.1&quot;
+</code></pre>
+<p>And these to the bottom of the file:</p>
+<pre><code class="language-toml">[package.metadata.raze.crates.prost.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.rustls-webpki.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.der\&quot;])&quot;
+
+[package.metadata.raze.crates.ring.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.der\&quot;])&quot;
+
+[package.metadata.raze.crates.axum.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+</code></pre>
+<p>Our full <code>$HOME/repo/third_party/rust/Cargo.toml</code> will look like:</p>
+<pre><code class="language-toml">[package]
+name = &quot;compile_with_bazel&quot;
+version = &quot;0.0.0&quot;
+
+# Mandatory (or Cargo tooling is unhappy)
+[lib]
+path = &quot;fake_lib.rs&quot;
+
+[dependencies]
+clap = { version = &quot;4.2.2&quot;, features = [&quot;derive&quot;] }
+log = &quot;0.4.17&quot;
+prost = &quot;0.11.6&quot;
+tonic = { version = &quot;0.9.1&quot;, features = [&quot;tls&quot;, &quot;tls-roots&quot;, &quot;default&quot;] }
+tonic-build = &quot;0.9.1&quot;
+
+[package.metadata.raze]
+# The path at which to write output files.
+#
+# `cargo raze` will generate Bazel-compatible BUILD files into this path.
+# This can either be a relative path (e.g. &quot;foo/bar&quot;), relative to this
+# Cargo.toml file; or relative to the Bazel workspace root (e.g. &quot;//foo/bar&quot;).
+workspace_path = &quot;//third_party/rust&quot;
+
+# This causes aliases for dependencies to be rendered in the BUILD
+# file located next to this `Cargo.toml` file.
+package_aliases_dir = &quot;.&quot;
+
+# The set of targets to generate BUILD rules for.
+targets = [
+    &quot;x86_64-unknown-linux-gnu&quot;,
+]
+
+# The two acceptable options are &quot;Remote&quot; and &quot;Vendored&quot; which
+# is used to indicate whether the user is using a non-vendored or
+# vendored set of dependencies.
+genmode = &quot;Remote&quot;
+
+default_gen_buildrs = true
+
+[package.metadata.raze.crates.clap.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.clap_builder.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.clap_derive.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.prost.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.rustls-webpki.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.der\&quot;])&quot;
+
+[package.metadata.raze.crates.ring.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.der\&quot;])&quot;
+
+[package.metadata.raze.crates.axum.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+</code></pre>
+<p>Now lets delete the lock file and run cargo raze:</p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust/
+rm Cargo.raze.lock
+cargo raze
+</code></pre>
+<p>And finally run <code>bazel build //...</code> to make sure we haven't broken anything yet.</p>
+<h3 id="using-tonic-to-generate-protobuf-and-grpc-code"><a class="header" href="#using-tonic-to-generate-protobuf-and-grpc-code">Using tonic to generate protobuf and gRPC code</a></h3>
+<p>To get a rust protobuf/gRPC library we need to run two steps. The first is running the
+tonic_build generator, which we can think of as having a <code>build.rs</code> or cargo build script
+that we run first. We'll use rules_rust [cargo_build_script] to do this.</p>
+<p>First lets make the <code>$HOME/repo/src/proto/summation/build.rs</code>:</p>
+<pre><pre class="playground"><code class="language-rust">fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    tonic_build::compile_protos(&quot;./summation.proto&quot;)?;
+    Ok(())
+}</code></pre></pre>
+<p>Next lets update <code>$HOME/repo/src/proto/summation/BUILD</code> to use it:</p>
+<pre><code class="language-python">load(&quot;@rules_proto//proto:defs.bzl&quot;, &quot;proto_library&quot;)
+load(&quot;@rules_rust//cargo:cargo_build_script.bzl&quot;, &quot;cargo_build_script&quot;)
+
+proto_library(
+    name = &quot;proto&quot;,
+    srcs = [
+        &quot;summation.proto&quot;,
+    ],
+    visibility = [&quot;//visibility:public&quot;],
+)
+
+cargo_build_script(
+    name = &quot;generate_rust_proto&quot;,
+    srcs = [
+        &quot;build.rs&quot;,
+    ],
+    deps = [
+        &quot;//third_party/rust:tonic_build&quot;,
+    ],
+    build_script_env = {
+        &quot;RUSTFMT&quot;: &quot;$(execpath @rules_rust//:rustfmt)&quot;,
+        &quot;PROTOC&quot;: &quot;$(execpath @com_google_protobuf//:protoc)&quot;
+    },
+    data = [
+        &quot;summation.proto&quot;,
+        &quot;@rules_rust//:rustfmt&quot;,
+        &quot;@com_google_protobuf//:protoc&quot;,
+    ],
+)
+</code></pre>
+<p>We've added a load line for <code>cargo_build_script</code> and then invoked that rule to run the generator. There's a lot going on here. One thing to note is Bazel uses different attributes to convey different <a href="https://bazel.build/concepts/dependencies#types-of-dependencies">types of dependencies</a>. We've seen <code>srcs</code> and <code>deps</code> already, <code>data</code> is kind of a catch-all used when
+things don't fit in <code>srcs</code> or <code>deps</code>. How these attributes are used varied based on the rule, so it's useful to check the
+docs of the rule you're using.</p>
+<p>In this case we're telling bazel that if the protofil, rustfmt, or protoc change we need to rerun the build script using the <code>data</code> attribute, and we're also telling it to expose those in the sandbox it runs the compile in.</p>
+<p>When we run the build script, we also need to set the environment variables <code>RUSTFMT</code> and <code>PROTOC</code> so that tonic_build knows where to find those, which is what the <code>build_script_env</code> attribute does. The <code>@rules_rust</code> is us pointing to the
+external <code>rules_rust</code> bazel workspace we're depending on in our <code>WORKSPACE</code> file. The <code>srcs</code> attribute points to our <code>build.rs</code> file (which we could have named something else like generate_rust_proto.rs if we wanted.</p>
+<h3 id="exposing-in-a-rust-library"><a class="header" href="#exposing-in-a-rust-library">Exposing in a rust library</a></h3>
+<p>The prior step just runs the build script. We need to add a <code>rust_library</code> target that includes it.</p>
+<p>To do this we'll add this to <code>$HOME/repo/src/proto/summation/BUILD</code></p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_library&quot;)
+
+rust_library(
+    name = &quot;src_proto_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+    ],
+    deps = [
+        &quot;:generate_rust_proto&quot;,
+        &quot;//third_party/rust:prost&quot;,
+        &quot;//third_party/rust:tonic&quot;,
+    ],
+    visibility = [&quot;//visibility:public&quot;],
+)
+</code></pre>
+<p>And we'll create <code>$HOME/repo/src/proto/summation/BUILD</code> with</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>tonic::include_proto!(&quot;src_proto_summation&quot;);
+<span class="boring">}</span></code></pre></pre>
+<p>Finally lets run <code>bazel build //...</code> and make sure everything builds!</p>
+<p>There's a decent amount of boilerplate for creating the proto. If I was doing it a lot, I would make my own bazel rule
+that does all this for me.</p>
+<h3 id="examining-the-generated-rust-file"><a class="header" href="#examining-the-generated-rust-file">Examining the generated rust file</a></h3>
+<p>Above we're generating the <code>src_proto_summation.rs</code> file. You can find the generated file in your $HOME/repo/bazel-out directory. The exact path will vary slightly, for me it's in <code>$HOME/repo/bazel-out/k8-fastbuild/bin/src/proto/summation/generate_rust_proto.out_dir/src_proto_summation.rs</code></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-grpc-server"><a class="header" href="#rust-grpc-server">Rust gRPC Server</a></h1>
+<p>We'll be expending our repo to get a gRPC server binary created. In the next chapter we'll use Bazel to build this into a docker container.</p>
+<p>We'll put the server in a new directory, <code>$HOME/repo/src/services/summation</code>. Again, Bazel doesn't care how we
+arrange our repository, at this point we've come up with this package structure:</p>
+<pre><code>src/proto/summation
+src/summation
+src/services/summation
+</code></pre>
+<p>The src/summation directory looks a little weird. We could pretty easily move it to something like <code>src/lib/summation</code>.
+We could also move things aroung to have:</p>
+<pre><code>src/summation/proto
+src/summation/lib
+src/summation/services
+</code></pre>
+<p>One feature of a monorepo where all the dependencies are self-contained is it's easier to move things after the fact. In
+general it's easier to make breaking and backwards incompatible changes in a monorepo. We won't do that here and we'll
+keep things as is.</p>
+<h2 id="exposing-tokio-crate"><a class="header" href="#exposing-tokio-crate">Exposing tokio crate</a></h2>
+<p>We'll use tokio to run our server. If you look in <code>$HOME/repo/third_party/rust/remote</code> you'll see that <code>cargo raze</code>
+has already pulled down tokio because it's a transitive dependency for other things. If you look at ``$HOME/repo/third_party/rust/BUILD.bazel<code>you'll see</code>cargo raze<code>made that BUILD file and exposes third-party crates using the</code>alias<code>rule. This is what exposes these crates under the</code>//third_party/rust<code>path, and cargo-raze only exposes the dependencies we explictly list in</code>$HOME/repo/third_party/rust/Cargo.toml`.</p>
+<p>Let's update <code>[dependencies]</code> of <code>$HOME/repo/third_party/rust/Cargo.toml</code> to include tokio:</p>
+<pre><code class="language-toml">[dependencies]
+clap = { version = &quot;4.2.2&quot;, features = [&quot;derive&quot;] }
+log = &quot;0.4.17&quot;
+prost = &quot;0.11.6&quot;
+tonic = { version = &quot;0.9.1&quot;, features = [&quot;tls&quot;, &quot;tls-roots&quot;, &quot;default&quot;] }
+tonic-build = &quot;0.9.1&quot;
+tokio = &quot;1.27&quot;
+</code></pre>
+<p>Then rerun cargo raze:</p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust
+cargo raze
+</code></pre>
+<p>We didn't remove the lock file because we're not expecting and don't want this step to change the versions of
+any of our third party crates.</p>
+<h2 id="creating-the-grpc-server"><a class="header" href="#creating-the-grpc-server">Creating the gRPC server</a></h2>
+<p>Now Let's start making <code>$HOME/repo/src/services/summation/main.rs</code> with:</p>
+<pre><pre class="playground"><code class="language-rust">use src_proto_summation::summation_server::SummationServer;
+use std::env;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tonic::transport::Server;
+
+mod my_summation;
+use my_summation::MySummation;
+
+#[tokio::main(flavor = &quot;current_thread&quot;)]
+async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let port = env::var(&quot;PORT&quot;)
+        .map(|p| p.parse::&lt;u16&gt;())
+        .unwrap_or(Ok(50051))?;
+    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), port);
+    let summation = MySummation::new();
+
+    Server::builder()
+        .add_service(SummationServer::new(summation))
+        .serve(addr)
+        .await?;
+
+    Ok(())
+}
+</code></pre></pre>
+<p>Then create <code>$HOME/repo/src/services/summation/my_summation.rs</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use src_proto_summation::summation_server::Summation;
+use src_proto_summation::ComputeSumF64Request;
+use src_proto_summation::ComputeSumF64Response;
+use src_summation::f64::summation_f64;
+use tonic::{Request, Response, Status};
+
+pub struct MySummation {}
+
+impl MySummation {
+    pub fn new() -&gt; Self {
+        MySummation {}
+    }
+}
+
+#[tonic::async_trait]
+impl Summation for MySummation {
+    async fn compute_sum_f64(
+        &amp;self,
+        request: Request&lt;ComputeSumF64Request&gt;,
+    ) -&gt; Result&lt;Response&lt;ComputeSumF64Response&gt;, Status&gt; {
+        let request = request.into_inner();
+        let sum = summation_f64(&amp;request.value);
+        Ok(Response::new(ComputeSumF64Response { sum }))
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>And finally make <code>$HOME/repo/src/services/summation/BUILD</code>:</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_binary&quot;)
+
+rust_binary(
+    name = &quot;server&quot;,
+    srcs = [
+        &quot;main.rs&quot;,
+        &quot;my_summation.rs&quot;,
+    ],
+    deps = [
+        &quot;//src/proto/summation:src_proto_summation&quot;,
+        &quot;//src/summation:src_summation&quot;,
+        &quot;//third_party/rust:tokio&quot;,
+        &quot;//third_party/rust:tonic&quot;,
+    ],
+)
+</code></pre>
+<p>Now let's try to build with <code>bazel build //...</code>. Oops, it doesn't work because <code>//src/summation:src_summation</code> isn't visible to our new package.</p>
+<h2 id="updating-visibility-of-srcsummationsrc_summation"><a class="header" href="#updating-visibility-of-srcsummationsrc_summation">Updating visibility of //src/summation:src_summation</a></h2>
+<p>The <a href="https://bazel.build/concepts/visibility#target-visibility">visibility</a> attribute on our targets controls
+who can depend on a target. In <code>//src/summation/BUILD</code> we omitted visibility for the <code>src_summation</code> target, which
+means it defaults to only being visible to targets in that same <code>BUILD</code> file. So our <code>//src/summation:executable</code> target
+could depend on it, but <code>//src/services/summation</code> can't.</p>
+<p>In a multi-owner repo where one team might own <code>//src/summation</code> and another team owns <code>//src/services/summation</code> this
+helps the first team ensure they control who can depend on them. (Usually you'll have a code review process with <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNERS</a> to ensure the <code>//src/summation</code> team reviews/approves any changes to visibility).</p>
+<p>To make <code>//src/summation:src_summation</code> visible to <code>/src/services/summation</code> we'll add
+<code>visibility = [&quot;//src/services/summation:__pgk__&quot;]</code> to the <code>src_summation</code> target in <code>$HOME/repo/src/summation/BUILD</code>:</p>
+<pre><code class="language-python">rust_library(
+    name = &quot;src_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+        &quot;f64.rs&quot;,
+        &quot;u32.rs&quot;,
+    ],
+    deps = [&quot;//third_party/rust:log&quot;],
+    visibility = [&quot;//src/services/summation:__pkg__&quot;],
+)
+</code></pre>
+<h2 id="build-and-test"><a class="header" href="#build-and-test">Build and test</a></h2>
+<p>Now when we run <code>bazel build //...</code> everything should build.</p>
+<p>Next, lets run our server:</p>
+<pre><code class="language-shell">bazel run -c opt //src/services/summation:server
+</code></pre>
+<p>Finally, to test it we'll use <code>grpcurl</code>. If you're on the debian VM we built you can use the following to get the binary:</p>
+<pre><code class="language-shell">cd $HOME/repo
+curl -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_linux_x86_64.tar.gz -o grpcurl.tar.gz
+tar -xzvf grpcurl.tar.gz grpcurl
+</code></pre>
+<p>And then run it:</p>
+<pre><code class="language-shell">cd $HOME/repo
+./grpcurl -proto repo/src/proto/summation/summation.proto -plaintext -d '{&quot;value&quot;: 5.0, &quot;value&quot;: 2.0}' localhost:50051 src_proto_summation.Summation/ComputeSumF64
+</code></pre>
+<p>This should output:</p>
+<pre><code>{
+  &quot;sum&quot;: 7
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="docker-container"><a class="header" href="#docker-container">Docker Container</a></h1>
+<p>Getting our binary into a docker container requires getting <a href="https://github.com/bazelbuild/rules_docker">rules_docker</a>
+setup and then using the <code>rust_image</code> rule it provides to build the container.</p>
+<h2 id="workspace-setup"><a class="header" href="#workspace-setup">Workspace setup</a></h2>
+<p>Let's add the following to <code>$HOME/repo/WORKSPACE</code> to pull rules_docker and the rust_image related config into our WORKSPACE:</p>
+<pre><code class="language-python">### rules_docker setup
+### FROM https://github.com/bazelbuild/rules_docker#setup
+###
+http_archive(
+    name = &quot;io_bazel_rules_docker&quot;,
+    sha256 = &quot;b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf&quot;,
+    urls = [&quot;https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz&quot;],
+)
+
+load(
+    &quot;@io_bazel_rules_docker//repositories:repositories.bzl&quot;,
+    container_repositories = &quot;repositories&quot;,
+)
+container_repositories()
+
+load(&quot;@io_bazel_rules_docker//repositories:deps.bzl&quot;, container_deps = &quot;deps&quot;)
+
+container_deps()
+
+load(
+    &quot;@io_bazel_rules_docker//container:container.bzl&quot;,
+    &quot;container_pull&quot;,
+)
+
+# rust_image
+load(
+    &quot;@io_bazel_rules_docker//rust:image.bzl&quot;,
+    _rust_image_repos = &quot;repositories&quot;,
+)
+
+_rust_image_repos()
+</code></pre>
+<p>These rules won't work without also having an empty <code>BUILD</code> file in the root of the repo, so lets make that:</p>
+<pre><code class="language-shell">touch $HOME/repo/BUILD
+</code></pre>
+<h2 id="building-container"><a class="header" href="#building-container">Building container</a></h2>
+<p>Now lets build the rust container image by editing <code>$HOME/repo/src/services/summation/BUILD</code>. We're going to add
+a new <code>load</code> rule and also a <code>rust_image</code> target, resulting in:</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_binary&quot;)
+load(&quot;@io_bazel_rules_docker//rust:image.bzl&quot;, &quot;rust_image&quot;)
+
+rust_binary(
+    name = &quot;server&quot;,
+    srcs = [
+        &quot;main.rs&quot;,
+        &quot;my_summation.rs&quot;,
+    ],
+    deps = [
+        &quot;//src/proto/summation:src_proto_summation&quot;,
+        &quot;//src/summation:src_summation&quot;,
+        &quot;//third_party/rust:tokio&quot;,
+        &quot;//third_party/rust:tonic&quot;,
+    ],
+)
+
+rust_image(
+    name = &quot;server_image&quot;,
+    binary = &quot;:server&quot;,
+)
+</code></pre>
+<p>That's pretty simple, we just have to tell the <code>rust_image</code> rule the binary target we want it
+to put in a container.</p>
+<p>Let's try building it, this time using <code>-c opt</code> so we get the equivilant of a <code>--release</code> build:</p>
+<pre><code class="language-shell">bazel build -c opt //...
+
+</code></pre>
+<p>If you have docker installed, you can run the image using:</p>
+<pre><code class="language-shell">bazel run -c opt //src/services/summation:server_image
+</code></pre>
+<p>And then from another window you should be able to test with grpcurl:</p>
+<pre><code class="language-shell">$ grpcurl -proto $HOME/repo/src/proto/summation/summation.proto -plaintext -d '{&quot;value&quot;: 5.0, &quot;value&quot;: 2.0}' localhost:50051 src_proto_summation.Summation/ComputeSumF64
+{
+  &quot;sum&quot;: 7
+}
+</code></pre>
+<p>To bring down the container you can run <code>docker ps</code> to find its id and use <code>docker kill [container id]</code> to bring it down.</p>
+<p>If you wanted to pass arguments to docker you can use <code>--</code> in the bazel run command and then include them. For example:</p>
+<pre><code>bazel run -c opt //src/services/summation:server_image -- -d -p 50051:50051
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pushing-containers-and-running-on-google-cloud"><a class="header" href="#pushing-containers-and-running-on-google-cloud">Pushing containers and running on Google Cloud</a></h1>
+<p><code>rules_docker</code> provides a <a href="https://github.com/bazelbuild/rules_docker#container_push">container_push</a> rule which can be used to push the container to a container/artifact registry. We'll provide an example of doing that and then using
+Google Cloud Run to launch our gRPC server container on Google Cloud.</p>
+<p>You'll need <code>gcloud</code> and <code>docker</code> installed for these instructions to work.</p>
+<h2 id="setting-up-artifact-registry"><a class="header" href="#setting-up-artifact-registry">Setting up artifact registry</a></h2>
+<p><a href="https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#create">Google's artifact-registry instructions</a> say you can use the following to create the artifact registry instance we'll use below:</p>
+<pre><code class="language-shell">gcloud artifacts repositories create quickstart-docker-repo --repository-format=docker \
+--location=us-central1 --description=&quot;Docker repository&quot;
+</code></pre>
+<p>Then we need to <a href="https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#auth">configure authentication</a>:</p>
+<pre><code class="language-shell">gcloud auth configure-docker us-central1-docker.pkg.dev
+</code></pre>
+<h2 id="pushing-the-container"><a class="header" href="#pushing-the-container">Pushing the container</a></h2>
+<p>We're going to add the <code>container_push</code> instructions to <code>$HOME/repo/src/services/summation/BUILD</code> by adding:</p>
+<pre><code class="language-python">load(&quot;@io_bazel_rules_docker//container:container.bzl&quot;, &quot;container_push&quot;)
+
+### ... existing lines in file
+
+container_push(
+   name = &quot;server_push&quot;,
+   image = &quot;:server_image&quot;,
+   format = &quot;Docker&quot;,
+   registry = &quot;us-central1-docker.pkg.dev&quot;,
+   repository = &quot;%YOUR_PROJECT_NAME%/quickstart-docker-repo/server-image&quot;,
+   tag = &quot;dev&quot;,
+)
+</code></pre>
+<p>You'll need to change <code>%YOUR_PROJECT_NAME%</code> to your Google cloud project name for this to work.</p>
+<p>Now you can push a new image using <code>bazel run</code>:</p>
+<pre><code class="language-shell">bazel run -c opt //src/services/summation:server_push
+</code></pre>
+<p>If that succeeds it should tell you where the image was pushed and the sha256.</p>
+<h2 id="running-on-google-cloud-run"><a class="header" href="#running-on-google-cloud-run">Running on Google Cloud Run</a></h2>
+<p>Now we can start a <a href="https://cloud.google.com/run/docs/deploying#service">cloud run service</a> using our pushed image by
+running <code>gcloud run deploy [SERVICE_NAME] --image [IMAGE_URL]</code>. Let's try it with some additional arguments</p>
+<pre><code class="language-shell">gcloud run deploy hello-bazel-service \
+  --image us-central1-docker.pkg.dev/%YOUR_PROJECT_NAME%/quickstart-docker-repo/server-image:dev \
+  --allow-unauthenticated \
+  --region us-central1
+</code></pre>
+<p>You'll need to change <code>%YOUR_PROJECT_NAME%</code> to your Google cloud project name.</p>
+<p>This should output a service url you can use to hit the service. Something like <code>https://hello-bazel-service-abcde-uc.a.run.app</code>. Let's test your service using that and grpcurl again.</p>
+<pre><code class="language-shell">grpcurl -proto src/proto/summation/summation.proto -d '{&quot;value&quot;: 5.0, &quot;value&quot;: 2.0}' hello-bazel-service-hxqyynk4pa-uc.a.run.app:443  src_proto_summation.Summation/ComputeSumF64
+</code></pre>
+<p>You should see it return ```json
+{
+&quot;sum&quot;: 7
+}</p>
+<pre><code>
+Congratulations!</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h1>
+<p>Congratulations on making it this far! At this point hopefully you've seen how Bazel can be used to build an
+end-to-end system.</p>
+<p>One catch-22 with Bazel is most of the benefits accrue as a repo get larger and more complicated, but it's harder to
+migrate an existing set of repos/crates/projects to Bazel after its evolved organically. Hopefully this doc helps you
+see how to get started while things are simple and manageble.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ps-tearing-down"><a class="header" href="#ps-tearing-down">PS: Tearing down</a></h1>
+<p>If you ran all the gcloud commands in earlier chapters you'll have created a vm, an artifact registry, and a cloud run service as part of going through the guide.</p>
+<p>To tear these all down use the following commands:</p>
+<pre><code class="language-shell"># Delete the VM
+gcloud compute instances delete hellobazel
+
+# Delete the cloud run service
+gcloud run services delete hello-bazel-service --region us-central1
+
+# Delete the artifact registry
+gcloud artifacts repositories delete quickstart-docker-repo --location=us-central1
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+        <!-- Google Analytics Tag -->
+        <script>
+            var localAddrs = ["localhost", "127.0.0.1", ""];
+
+            // make sure we don't activate google analytics if the developer is
+            // inspecting the book locally...
+            if (localAddrs.indexOf(document.location.hostname) === -1) {
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+                ga('create', 'G-JJ892SZC4M', 'auto');
+                ga('send', 'pageview');
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

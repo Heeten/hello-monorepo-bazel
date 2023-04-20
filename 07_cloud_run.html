@@ -1,0 +1,264 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Pushing containers and running on Google Cloud - Using Bazel with Rust, gRPC, protobuf, and Docker</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02_pre_reqs_install_bazel.html"><strong aria-hidden="true">2.</strong> Prerequisites and Installing Bazel</a></li><li class="chapter-item expanded "><a href="03a_create_repo_workspace.html"><strong aria-hidden="true">3.</strong> Create repository and bazel workspace</a></li><li class="chapter-item expanded "><a href="03b_rust_hello_world.html"><strong aria-hidden="true">4.</strong> Rust hello world</a></li><li class="chapter-item expanded "><a href="03c_rust_lib_unit_test.html"><strong aria-hidden="true">5.</strong> Rust Library</a></li><li class="chapter-item expanded "><a href="03d_rust_unit_test.html"><strong aria-hidden="true">6.</strong> Unit test Rust Library</a></li><li class="chapter-item expanded "><a href="03e_rust_linked_binary.html"><strong aria-hidden="true">7.</strong> Link rust binary to library</a></li><li class="chapter-item expanded "><a href="release_mode.html"><strong aria-hidden="true">8.</strong> '--release mode' builds</a></li><li class="chapter-item expanded "><a href="05_rust_cli_client_with_clap.html"><strong aria-hidden="true">9.</strong> Pulling in external crates like Clap</a></li><li class="chapter-item expanded "><a href="rust_protobuf.html"><strong aria-hidden="true">10.</strong> Building Rust protobuf</a></li><li class="chapter-item expanded "><a href="04_rust_grpc_server_and_third_party_crates.html"><strong aria-hidden="true">11.</strong> Rust gRPC Server</a></li><li class="chapter-item expanded "><a href="06_docker_container.html"><strong aria-hidden="true">12.</strong> Docker Container</a></li><li class="chapter-item expanded "><a href="07_cloud_run.html" class="active"><strong aria-hidden="true">13.</strong> Pushing containers and running on Google Cloud</a></li><li class="chapter-item expanded "><a href="conclusion.html"><strong aria-hidden="true">14.</strong> Conclusion</a></li><li class="chapter-item expanded "><a href="teardown.html"><strong aria-hidden="true">15.</strong> PS: Tearing down</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using Bazel with Rust, gRPC, protobuf, and Docker</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="pushing-containers-and-running-on-google-cloud"><a class="header" href="#pushing-containers-and-running-on-google-cloud">Pushing containers and running on Google Cloud</a></h1>
+<p><code>rules_docker</code> provides a <a href="https://github.com/bazelbuild/rules_docker#container_push">container_push</a> rule which can be used to push the container to a container/artifact registry. We'll provide an example of doing that and then using
+Google Cloud Run to launch our gRPC server container on Google Cloud.</p>
+<p>You'll need <code>gcloud</code> and <code>docker</code> installed for these instructions to work.</p>
+<h2 id="setting-up-artifact-registry"><a class="header" href="#setting-up-artifact-registry">Setting up artifact registry</a></h2>
+<p><a href="https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#create">Google's artifact-registry instructions</a> say you can use the following to create the artifact registry instance we'll use below:</p>
+<pre><code class="language-shell">gcloud artifacts repositories create quickstart-docker-repo --repository-format=docker \
+--location=us-central1 --description=&quot;Docker repository&quot;
+</code></pre>
+<p>Then we need to <a href="https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images#auth">configure authentication</a>:</p>
+<pre><code class="language-shell">gcloud auth configure-docker us-central1-docker.pkg.dev
+</code></pre>
+<h2 id="pushing-the-container"><a class="header" href="#pushing-the-container">Pushing the container</a></h2>
+<p>We're going to add the <code>container_push</code> instructions to <code>$HOME/repo/src/services/summation/BUILD</code> by adding:</p>
+<pre><code class="language-python">load(&quot;@io_bazel_rules_docker//container:container.bzl&quot;, &quot;container_push&quot;)
+
+### ... existing lines in file
+
+container_push(
+   name = &quot;server_push&quot;,
+   image = &quot;:server_image&quot;,
+   format = &quot;Docker&quot;,
+   registry = &quot;us-central1-docker.pkg.dev&quot;,
+   repository = &quot;%YOUR_PROJECT_NAME%/quickstart-docker-repo/server-image&quot;,
+   tag = &quot;dev&quot;,
+)
+</code></pre>
+<p>You'll need to change <code>%YOUR_PROJECT_NAME%</code> to your Google cloud project name for this to work.</p>
+<p>Now you can push a new image using <code>bazel run</code>:</p>
+<pre><code class="language-shell">bazel run -c opt //src/services/summation:server_push
+</code></pre>
+<p>If that succeeds it should tell you where the image was pushed and the sha256.</p>
+<h2 id="running-on-google-cloud-run"><a class="header" href="#running-on-google-cloud-run">Running on Google Cloud Run</a></h2>
+<p>Now we can start a <a href="https://cloud.google.com/run/docs/deploying#service">cloud run service</a> using our pushed image by
+running <code>gcloud run deploy [SERVICE_NAME] --image [IMAGE_URL]</code>. Let's try it with some additional arguments</p>
+<pre><code class="language-shell">gcloud run deploy hello-bazel-service \
+  --image us-central1-docker.pkg.dev/%YOUR_PROJECT_NAME%/quickstart-docker-repo/server-image:dev \
+  --allow-unauthenticated \
+  --region us-central1
+</code></pre>
+<p>You'll need to change <code>%YOUR_PROJECT_NAME%</code> to your Google cloud project name.</p>
+<p>This should output a service url you can use to hit the service. Something like <code>https://hello-bazel-service-abcde-uc.a.run.app</code>. Let's test your service using that and grpcurl again.</p>
+<pre><code class="language-shell">grpcurl -proto src/proto/summation/summation.proto -d '{&quot;value&quot;: 5.0, &quot;value&quot;: 2.0}' hello-bazel-service-hxqyynk4pa-uc.a.run.app:443  src_proto_summation.Summation/ComputeSumF64
+</code></pre>
+<p>You should see it return ```json
+{
+&quot;sum&quot;: 7
+}</p>
+<pre><code>
+Congratulations!</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="06_docker_container.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="conclusion.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="06_docker_container.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="conclusion.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+        <!-- Google Analytics Tag -->
+        <script>
+            var localAddrs = ["localhost", "127.0.0.1", ""];
+
+            // make sure we don't activate google analytics if the developer is
+            // inspecting the book locally...
+            if (localAddrs.indexOf(document.location.hostname) === -1) {
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+                ga('create', 'G-JJ892SZC4M', 'auto');
+                ga('send', 'pageview');
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

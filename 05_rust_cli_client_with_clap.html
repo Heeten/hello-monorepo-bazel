@@ -1,0 +1,458 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Pulling in external crates like Clap - Using Bazel with Rust, gRPC, protobuf, and Docker</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02_pre_reqs_install_bazel.html"><strong aria-hidden="true">2.</strong> Prerequisites and Installing Bazel</a></li><li class="chapter-item expanded "><a href="03a_create_repo_workspace.html"><strong aria-hidden="true">3.</strong> Create repository and bazel workspace</a></li><li class="chapter-item expanded "><a href="03b_rust_hello_world.html"><strong aria-hidden="true">4.</strong> Rust hello world</a></li><li class="chapter-item expanded "><a href="03c_rust_lib_unit_test.html"><strong aria-hidden="true">5.</strong> Rust Library</a></li><li class="chapter-item expanded "><a href="03d_rust_unit_test.html"><strong aria-hidden="true">6.</strong> Unit test Rust Library</a></li><li class="chapter-item expanded "><a href="03e_rust_linked_binary.html"><strong aria-hidden="true">7.</strong> Link rust binary to library</a></li><li class="chapter-item expanded "><a href="release_mode.html"><strong aria-hidden="true">8.</strong> '--release mode' builds</a></li><li class="chapter-item expanded "><a href="05_rust_cli_client_with_clap.html" class="active"><strong aria-hidden="true">9.</strong> Pulling in external crates like Clap</a></li><li class="chapter-item expanded "><a href="rust_protobuf.html"><strong aria-hidden="true">10.</strong> Building Rust protobuf</a></li><li class="chapter-item expanded "><a href="04_rust_grpc_server_and_third_party_crates.html"><strong aria-hidden="true">11.</strong> Rust gRPC Server</a></li><li class="chapter-item expanded "><a href="06_docker_container.html"><strong aria-hidden="true">12.</strong> Docker Container</a></li><li class="chapter-item expanded "><a href="07_cloud_run.html"><strong aria-hidden="true">13.</strong> Pushing containers and running on Google Cloud</a></li><li class="chapter-item expanded "><a href="conclusion.html"><strong aria-hidden="true">14.</strong> Conclusion</a></li><li class="chapter-item expanded "><a href="teardown.html"><strong aria-hidden="true">15.</strong> PS: Tearing down</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using Bazel with Rust, gRPC, protobuf, and Docker</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="pulling-in-external-crates-like-clap"><a class="header" href="#pulling-in-external-crates-like-clap">Pulling in external crates like Clap</a></h1>
+<p>We'll use <a href="https://github.com/google/cargo-raze">cargo raze</a>. There's a newer alternate way to pull crates.io crates
+into bazel using <a href="http://bazelbuild.github.io/rules_rust/crate_universe.html">crate universe</a> that we don't cover here.
+With cargo raze you create a <code>Cargo.toml</code> file to specify the crates.io crates you will depend on and use the
+<code>raze</code> extension to create Bazel rules for compiling each of these. The dependencies can be vendored, but we'll
+use the non-vendored mode in the examples below.</p>
+<p>If you're starting from our blank VM we'll need to install rust and cargo. Using <a href="https://doc.rust-lang.org/cargo/getting-started/installation.html">The Cargo Book</a> instructions:</p>
+<pre><code class="language-shell">curl https://sh.rustup.rs -sSf | sh
+</code></pre>
+<p>Add cargo to the path:</p>
+<pre><code class="language-shell">source &quot;$HOME/.cargo/env&quot;
+</code></pre>
+<p>Next lets install <code>cargo raze</code></p>
+<pre><code class="language-shell">cargo install cargo-raze
+</code></pre>
+<p>If you're using the VM we setup, that failed saying <code>The pkg-config command could not be found</code> and also complaining about open ssl. Let's fix that and try
+again:</p>
+<pre><code class="language-shell">sudo apt install pkg-config libssl-dev
+cargo install cargo-raze
+</code></pre>
+<p>Now that we have Cargo and cargo-raze, lets put our third-party rust dependencies under the <code>//third_party/rust</code> path in our repo. First let's make that
+directory:</p>
+<pre><code class="language-shell">mkdir $HOME/repo/third_party
+mkdir $HOME/repo/third_party/rust
+</code></pre>
+<p>Now lets make <code>$HOME/repo/third_party/rust/Cargo.toml</code> and follow the <a href="https://github.com/google/cargo-raze#generate-a-cargotoml">instructions</a> for this:</p>
+<pre><code>[package]
+name = &quot;compile_with_bazel&quot;
+version = &quot;0.0.0&quot;
+
+# Mandatory (or Cargo tooling is unhappy)
+[lib]
+path = &quot;fake_lib.rs&quot;
+
+[dependencies]
+log = &quot;0.4.17&quot;
+
+[package.metadata.raze]
+# The path at which to write output files.
+#
+# `cargo raze` will generate Bazel-compatible BUILD files into this path.
+# This can either be a relative path (e.g. &quot;foo/bar&quot;), relative to this
+# Cargo.toml file; or relative to the Bazel workspace root (e.g. &quot;//foo/bar&quot;).
+workspace_path = &quot;//third_party/rust&quot;
+
+# This causes aliases for dependencies to be rendered in the BUILD
+# file located next to this `Cargo.toml` file.
+package_aliases_dir = &quot;.&quot;
+
+# The set of targets to generate BUILD rules for.
+targets = [
+    &quot;x86_64-unknown-linux-gnu&quot;,
+]
+
+# The two acceptable options are &quot;Remote&quot; and &quot;Vendored&quot; which
+# is used to indicate whether the user is using a non-vendored or
+# vendored set of dependencies.
+genmode = &quot;Remote&quot;
+
+default_gen_buildrs = true
+</code></pre>
+<p>Now from the <code>$HOME/repo/third_party/rust</code> directory run cargo raze</p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust
+cargo raze
+</code></pre>
+<blockquote>
+<p>For some reason on my VM cargo raze failed and looking at the <a href="https://github.com/google/cargo-raze/blob/v0.16.1/impl/src/rendering/bazel.rs#L78">cargo-raze code</a> it seems to be because a dummy directory is missing. I
+fixed this by running <code>mkdir -p &quot;/tmp/cargo-raze/doesnt/exist/&quot;</code> and then running <code>cargo raze</code> again.</p>
+</blockquote>
+<p>This should create a few different files in that directory, and a remote directory.
+The <code>$HOME/repo/third_party/rust/BUILD.bazel</code> file creates a new <code>:log</code> target which
+allows you to depend on the log crate. We can add <code>//third_party/rust:log</code> to the <code>deps</code>
+attribute of our <code>rust_library</code> and <code>rust_binary</code> rules to pull in the <code>log</code> crate.</p>
+<p>We also need to update <code>$HOME/repo/WORKSPACE</code> to pull down the remote crates. Add this to the
+bottom of <code>WORKSPACE</code>:</p>
+<pre><code class="language-python">### Cargo raze deps
+###
+load(&quot;//third_party/rust:crates.bzl&quot;, &quot;raze_fetch_remote_crates&quot;)
+
+# Note that this method's name depends on your gen_workspace_prefix setting.
+# `raze` is the default prefix.
+raze_fetch_remote_crates()
+</code></pre>
+<p>Let's add <code>log</code> to our library by editing <code>$HOME/repo/src/summation/BUILD</code> and updating
+the rust_library deps to say:</p>
+<pre><code class="language-python">rust_library(
+    name = &quot;src_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+        &quot;f64.rs&quot;,
+        &quot;u32.rs&quot;,
+    ],
+    deps = [&quot;//third_party/rust:log&quot;],
+)
+</code></pre>
+<p>Now lets use <code>log</code> in <code>f64.rs</code> by changing the top of the file to this:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use log::trace;
+
+pub fn summation_f64(values: &amp;[f64]) -&gt; f64 {
+    trace!(&quot;summation_f64&quot;);
+    values.iter().sum()
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Then lets rebuild and see what happens:</p>
+<pre><code class="language-shell">$ bazel build //...
+INFO: Analyzed 5 targets (5 packages loaded, 43 targets configured).
+INFO: Found 5 targets...
+INFO: Elapsed time: 2.326s, Critical Path: 1.91s
+INFO: 14 processes: 5 internal, 9 linux-sandbox.
+INFO: Build completed successfully, 14 total actions
+</code></pre>
+<p>You should see some output showing it's pulling down the third party crates and then everything compiles.</p>
+<h2 id="adding-clap"><a class="header" href="#adding-clap">Adding Clap</a></h2>
+<p>Now let's add clap. We'll see there's a gotcha we need to deal with for that crate due to Bazel's sandboxing.</p>
+<p>First we'll add Clap along with the <code>derive</code> featur to <code>$HOME/repo/third_party/rust/Cargo.toml</code> under the <code>[dependencies]</code> section:</p>
+<pre><code>[dependencies]
+log = &quot;0.4.17&quot;
+clap = { version = &quot;4.2.2&quot;, features = [&quot;derive&quot;] }
+</code></pre>
+<p>Then lets rerun <code>cargo raze</code> from <code>$HOME/repo/third_party/rust</code></p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust
+cargo raze
+</code></pre>
+<p>You might see a warning about needing to run <code>cargo generate-lockfile</code>. We can delete <code>Cargo.raze.lock</code> and rerun
+cargo raze to update versions of packages and create a new lockfile.</p>
+<pre><code class="language-shell">rm Cargo.raze.lock
+cargo raze
+</code></pre>
+<p>Now lets go back to <code>$HOME/repo/src/summation/BUILD</code> and add <code>&quot;//third_party/rust:log&quot;</code> to our binary <code>deps</code>, resulting
+in:</p>
+<pre><code class="language-python">rust_binary(
+    #We are going to call the target/binary summation
+    name = &quot;executable&quot;,
+    #The list of src files it needs (just main.rs)
+    srcs = [&quot;main.rs&quot;],
+    #Any libraries/crates it depends on, for now we'll leave this blank
+    deps = [
+        &quot;:src_summation&quot;,
+        &quot;//third_party/rust:clap&quot;,
+    ],
+    #The crate_root file, this would default to main.rs but we put it in for clarity
+    crate_root = &quot;main.rs&quot;,
+)
+</code></pre>
+<p>We'll try to build it before actually updating main.rs to use the code by running</p>
+<pre><code class="language-shell">bazel build //...
+</code></pre>
+<p>And it fails with output looking like:</p>
+<pre><code>INFO: Analyzed 5 targets (18 packages loaded, 806 targets configured).
+INFO: Found 5 targets...
+ERROR: /home/parallels/.cache/bazel/_bazel_parallels/8136e33dd0c038f4f223262d62801c45/external/raze__clap_builder__4_2_2/BUILD.bazel:34:13: Compiling Rust rlib clap_builder v4.2.2 (54 files) failed: (Exit 1): process_wrapper failed: error executing command (from target @raze__clap_builder__4_2_2//:clap_builder) bazel-out/k8-opt-exec-2B5CBBC6/bin/external/rules_rust/util/process_wrapper/process_wrapper --arg-file ... (remaining 57 arguments skipped)
+
+Use --sandbox_debug to see verbose messages from the sandbox and retain the sandbox build root for debugging
+error: couldn't read external/raze__clap_builder__4_2_2/src/../README.md: No such file or directory (os error 2)
+ --&gt; external/raze__clap_builder__4_2_2/src/lib.rs:7:10
+  |
+7 | #![doc = include_str!(&quot;../README.md&quot;)]
+  |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `include_str` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: aborting due to previous error
+
+INFO: Elapsed time: 5.310s, Critical Path: 4.04s
+INFO: 29 processes: 8 internal, 21 linux-sandbox.
+FAILED: Build did NOT complete successfully
+</code></pre>
+<p>What's going on here? It's hard to believe the clap release from crates.io doesn't build, but that's what Bazel tells us.
+If you look at the error, you see it's using the <code>include_str!</code> macro not being able to find <code>../README.md</code>. Back in the hello world chapter we mentioned Bazel tries to ensure <a href="https://bazel.build/basics/hermeticity">hermetic builds</a> by compiling code in a sandbox. One goal of the sandbox is to ensure you can't depend on anything that you haven't told Bazel explictly about. By default, cargo raze tells Bazel to bring over all the <code>*.rs</code> files, but it doesn't specify the compile needs  <code>README.md</code>. We can set an option to tell it we need this by adding these lines to <code>$HOME/repo/third_party/rust/Cargo.toml</code>:</p>
+<pre><code>[package.metadata.raze.crates.clap.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.clap_builder.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+
+[package.metadata.raze.crates.clap_derive.'*']
+compile_data_attr = &quot;glob([\&quot;**/*.md\&quot;])&quot;
+</code></pre>
+<p>Then let's run cargo raze again to get it to regen the third party crate build files.</p>
+<pre><code class="language-shell">cargo raze
+</code></pre>
+<p>And try building again</p>
+<pre><code class="language-shell">bazel build //...
+</code></pre>
+<p>At this point it should have built and you should be able to run your executable:</p>
+<pre><code class="language-shell">bazel run //src/summation:executable -- 0.0 1.0 2.0
+</code></pre>
+<p>That should output <code>sum = 3</code>. For completeness let's open up <code>$HOME/repo/src/summation/main.rs</code> and use clap
+to parse the args. The final code we'll end up there will be:</p>
+<pre><pre class="playground"><code class="language-rust">use clap::{Parser, Subcommand};
+use src_summation::f64::summation_f64;
+use src_summation::u32::summation_u32;
+
+#[derive(Subcommand)]
+enum Cmd {
+    U32 { args: Vec&lt;String&gt; },
+    F64 { args: Vec&lt;String&gt; },
+}
+
+#[derive(Parser)]
+struct Arguments {
+    #[command(subcommand)]
+    cmd: Cmd,
+}
+
+fn main() {
+    let args = Arguments::parse();
+    match args.cmd {
+        Cmd::U32 { args } =&gt; {
+            let args: Vec&lt;u32&gt; = args.into_iter().map(|a| a.parse().unwrap()).collect();
+            println!(&quot;sum = {}&quot;, summation_u32(&amp;args))
+        }
+        Cmd::F64 { args } =&gt; {
+            let args: Vec&lt;f64&gt; = args.into_iter().map(|a| a.parse().unwrap()).collect();
+            println!(&quot;sum = {}&quot;, summation_f64(&amp;args))
+        }
+    }
+}</code></pre></pre>
+<p>Which we can run and get the help usage for by running:</p>
+<pre><code class="language-shell">bazel run //src/summation:executable -- --help
+</code></pre>
+<p>Which shows us:</p>
+<pre><code>WARNING: Ignoring JAVA_HOME, because it must point to a JDK, not a JRE.
+INFO: Analyzed target //src/summation:executable (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Target //src/summation:executable up-to-date:
+  bazel-bin/src/summation/executable
+INFO: Elapsed time: 0.104s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/src/summation/executable --help
+Usage: executable &lt;COMMAND&gt;
+
+Commands:
+  u32
+  f64
+  help  Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help  Print help
+
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="release_mode.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="rust_protobuf.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="release_mode.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="rust_protobuf.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+        <!-- Google Analytics Tag -->
+        <script>
+            var localAddrs = ["localhost", "127.0.0.1", ""];
+
+            // make sure we don't activate google analytics if the developer is
+            // inspecting the book locally...
+            if (localAddrs.indexOf(document.location.hostname) === -1) {
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+                ga('create', 'G-JJ892SZC4M', 'auto');
+                ga('send', 'pageview');
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

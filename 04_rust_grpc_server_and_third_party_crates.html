@@ -1,0 +1,361 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust gRPC Server - Using Bazel with Rust, gRPC, protobuf, and Docker</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02_pre_reqs_install_bazel.html"><strong aria-hidden="true">2.</strong> Prerequisites and Installing Bazel</a></li><li class="chapter-item expanded "><a href="03a_create_repo_workspace.html"><strong aria-hidden="true">3.</strong> Create repository and bazel workspace</a></li><li class="chapter-item expanded "><a href="03b_rust_hello_world.html"><strong aria-hidden="true">4.</strong> Rust hello world</a></li><li class="chapter-item expanded "><a href="03c_rust_lib_unit_test.html"><strong aria-hidden="true">5.</strong> Rust Library</a></li><li class="chapter-item expanded "><a href="03d_rust_unit_test.html"><strong aria-hidden="true">6.</strong> Unit test Rust Library</a></li><li class="chapter-item expanded "><a href="03e_rust_linked_binary.html"><strong aria-hidden="true">7.</strong> Link rust binary to library</a></li><li class="chapter-item expanded "><a href="release_mode.html"><strong aria-hidden="true">8.</strong> '--release mode' builds</a></li><li class="chapter-item expanded "><a href="05_rust_cli_client_with_clap.html"><strong aria-hidden="true">9.</strong> Pulling in external crates like Clap</a></li><li class="chapter-item expanded "><a href="rust_protobuf.html"><strong aria-hidden="true">10.</strong> Building Rust protobuf</a></li><li class="chapter-item expanded "><a href="04_rust_grpc_server_and_third_party_crates.html" class="active"><strong aria-hidden="true">11.</strong> Rust gRPC Server</a></li><li class="chapter-item expanded "><a href="06_docker_container.html"><strong aria-hidden="true">12.</strong> Docker Container</a></li><li class="chapter-item expanded "><a href="07_cloud_run.html"><strong aria-hidden="true">13.</strong> Pushing containers and running on Google Cloud</a></li><li class="chapter-item expanded "><a href="conclusion.html"><strong aria-hidden="true">14.</strong> Conclusion</a></li><li class="chapter-item expanded "><a href="teardown.html"><strong aria-hidden="true">15.</strong> PS: Tearing down</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Using Bazel with Rust, gRPC, protobuf, and Docker</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rust-grpc-server"><a class="header" href="#rust-grpc-server">Rust gRPC Server</a></h1>
+<p>We'll be expending our repo to get a gRPC server binary created. In the next chapter we'll use Bazel to build this into a docker container.</p>
+<p>We'll put the server in a new directory, <code>$HOME/repo/src/services/summation</code>. Again, Bazel doesn't care how we
+arrange our repository, at this point we've come up with this package structure:</p>
+<pre><code>src/proto/summation
+src/summation
+src/services/summation
+</code></pre>
+<p>The src/summation directory looks a little weird. We could pretty easily move it to something like <code>src/lib/summation</code>.
+We could also move things aroung to have:</p>
+<pre><code>src/summation/proto
+src/summation/lib
+src/summation/services
+</code></pre>
+<p>One feature of a monorepo where all the dependencies are self-contained is it's easier to move things after the fact. In
+general it's easier to make breaking and backwards incompatible changes in a monorepo. We won't do that here and we'll
+keep things as is.</p>
+<h2 id="exposing-tokio-crate"><a class="header" href="#exposing-tokio-crate">Exposing tokio crate</a></h2>
+<p>We'll use tokio to run our server. If you look in <code>$HOME/repo/third_party/rust/remote</code> you'll see that <code>cargo raze</code>
+has already pulled down tokio because it's a transitive dependency for other things. If you look at ``$HOME/repo/third_party/rust/BUILD.bazel<code>you'll see</code>cargo raze<code>made that BUILD file and exposes third-party crates using the</code>alias<code>rule. This is what exposes these crates under the</code>//third_party/rust<code>path, and cargo-raze only exposes the dependencies we explictly list in</code>$HOME/repo/third_party/rust/Cargo.toml`.</p>
+<p>Let's update <code>[dependencies]</code> of <code>$HOME/repo/third_party/rust/Cargo.toml</code> to include tokio:</p>
+<pre><code class="language-toml">[dependencies]
+clap = { version = &quot;4.2.2&quot;, features = [&quot;derive&quot;] }
+log = &quot;0.4.17&quot;
+prost = &quot;0.11.6&quot;
+tonic = { version = &quot;0.9.1&quot;, features = [&quot;tls&quot;, &quot;tls-roots&quot;, &quot;default&quot;] }
+tonic-build = &quot;0.9.1&quot;
+tokio = &quot;1.27&quot;
+</code></pre>
+<p>Then rerun cargo raze:</p>
+<pre><code class="language-shell">cd $HOME/repo/third_party/rust
+cargo raze
+</code></pre>
+<p>We didn't remove the lock file because we're not expecting and don't want this step to change the versions of
+any of our third party crates.</p>
+<h2 id="creating-the-grpc-server"><a class="header" href="#creating-the-grpc-server">Creating the gRPC server</a></h2>
+<p>Now Let's start making <code>$HOME/repo/src/services/summation/main.rs</code> with:</p>
+<pre><pre class="playground"><code class="language-rust">use src_proto_summation::summation_server::SummationServer;
+use std::env;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tonic::transport::Server;
+
+mod my_summation;
+use my_summation::MySummation;
+
+#[tokio::main(flavor = &quot;current_thread&quot;)]
+async fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let port = env::var(&quot;PORT&quot;)
+        .map(|p| p.parse::&lt;u16&gt;())
+        .unwrap_or(Ok(50051))?;
+    let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), port);
+    let summation = MySummation::new();
+
+    Server::builder()
+        .add_service(SummationServer::new(summation))
+        .serve(addr)
+        .await?;
+
+    Ok(())
+}
+</code></pre></pre>
+<p>Then create <code>$HOME/repo/src/services/summation/my_summation.rs</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use src_proto_summation::summation_server::Summation;
+use src_proto_summation::ComputeSumF64Request;
+use src_proto_summation::ComputeSumF64Response;
+use src_summation::f64::summation_f64;
+use tonic::{Request, Response, Status};
+
+pub struct MySummation {}
+
+impl MySummation {
+    pub fn new() -&gt; Self {
+        MySummation {}
+    }
+}
+
+#[tonic::async_trait]
+impl Summation for MySummation {
+    async fn compute_sum_f64(
+        &amp;self,
+        request: Request&lt;ComputeSumF64Request&gt;,
+    ) -&gt; Result&lt;Response&lt;ComputeSumF64Response&gt;, Status&gt; {
+        let request = request.into_inner();
+        let sum = summation_f64(&amp;request.value);
+        Ok(Response::new(ComputeSumF64Response { sum }))
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<p>And finally make <code>$HOME/repo/src/services/summation/BUILD</code>:</p>
+<pre><code class="language-python">load(&quot;@rules_rust//rust:defs.bzl&quot;, &quot;rust_binary&quot;)
+
+rust_binary(
+    name = &quot;server&quot;,
+    srcs = [
+        &quot;main.rs&quot;,
+        &quot;my_summation.rs&quot;,
+    ],
+    deps = [
+        &quot;//src/proto/summation:src_proto_summation&quot;,
+        &quot;//src/summation:src_summation&quot;,
+        &quot;//third_party/rust:tokio&quot;,
+        &quot;//third_party/rust:tonic&quot;,
+    ],
+)
+</code></pre>
+<p>Now let's try to build with <code>bazel build //...</code>. Oops, it doesn't work because <code>//src/summation:src_summation</code> isn't visible to our new package.</p>
+<h2 id="updating-visibility-of-srcsummationsrc_summation"><a class="header" href="#updating-visibility-of-srcsummationsrc_summation">Updating visibility of //src/summation:src_summation</a></h2>
+<p>The <a href="https://bazel.build/concepts/visibility#target-visibility">visibility</a> attribute on our targets controls
+who can depend on a target. In <code>//src/summation/BUILD</code> we omitted visibility for the <code>src_summation</code> target, which
+means it defaults to only being visible to targets in that same <code>BUILD</code> file. So our <code>//src/summation:executable</code> target
+could depend on it, but <code>//src/services/summation</code> can't.</p>
+<p>In a multi-owner repo where one team might own <code>//src/summation</code> and another team owns <code>//src/services/summation</code> this
+helps the first team ensure they control who can depend on them. (Usually you'll have a code review process with <a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners">CODEOWNERS</a> to ensure the <code>//src/summation</code> team reviews/approves any changes to visibility).</p>
+<p>To make <code>//src/summation:src_summation</code> visible to <code>/src/services/summation</code> we'll add
+<code>visibility = [&quot;//src/services/summation:__pgk__&quot;]</code> to the <code>src_summation</code> target in <code>$HOME/repo/src/summation/BUILD</code>:</p>
+<pre><code class="language-python">rust_library(
+    name = &quot;src_summation&quot;,
+    srcs = [
+        &quot;lib.rs&quot;,
+        &quot;f64.rs&quot;,
+        &quot;u32.rs&quot;,
+    ],
+    deps = [&quot;//third_party/rust:log&quot;],
+    visibility = [&quot;//src/services/summation:__pkg__&quot;],
+)
+</code></pre>
+<h2 id="build-and-test"><a class="header" href="#build-and-test">Build and test</a></h2>
+<p>Now when we run <code>bazel build //...</code> everything should build.</p>
+<p>Next, lets run our server:</p>
+<pre><code class="language-shell">bazel run -c opt //src/services/summation:server
+</code></pre>
+<p>Finally, to test it we'll use <code>grpcurl</code>. If you're on the debian VM we built you can use the following to get the binary:</p>
+<pre><code class="language-shell">cd $HOME/repo
+curl -L https://github.com/fullstorydev/grpcurl/releases/download/v1.8.7/grpcurl_1.8.7_linux_x86_64.tar.gz -o grpcurl.tar.gz
+tar -xzvf grpcurl.tar.gz grpcurl
+</code></pre>
+<p>And then run it:</p>
+<pre><code class="language-shell">cd $HOME/repo
+./grpcurl -proto repo/src/proto/summation/summation.proto -plaintext -d '{&quot;value&quot;: 5.0, &quot;value&quot;: 2.0}' localhost:50051 src_proto_summation.Summation/ComputeSumF64
+</code></pre>
+<p>This should output:</p>
+<pre><code>{
+  &quot;sum&quot;: 7
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="rust_protobuf.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="06_docker_container.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="rust_protobuf.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="06_docker_container.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+        <!-- Google Analytics Tag -->
+        <script>
+            var localAddrs = ["localhost", "127.0.0.1", ""];
+
+            // make sure we don't activate google analytics if the developer is
+            // inspecting the book locally...
+            if (localAddrs.indexOf(document.location.hostname) === -1) {
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+                ga('create', 'G-JJ892SZC4M', 'auto');
+                ga('send', 'pageview');
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
