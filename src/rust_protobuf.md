@@ -70,7 +70,7 @@ Finally run `bazel build //...` to build everything.
 We're going to use [tonic](https://github.com/hyperium/tonic) for our gRPC server and use tonic_build to generate the protobuf and gRPC code.
 
 ### Pulling in tonic, tonic_build, and prost
-Do generate and compile the protobuf and gRPC code we'll need to explictly expose the tonic, tonic_build, and prost crates.
+To generate and compile the protobuf and gRPC code we'll need to explictly expose the tonic, tonic_build, and prost crates.
 
 When we pull down tonic we'll enable the tls features, even though we won't use them (yet) in this guide. We'll also need
 to tell bazel that the compile depends on `*.md` files for prost, and some other files for other transitive dependencies (which
@@ -247,7 +247,7 @@ rust_library(
 )
 ```
 
-And we'll create `$HOME/repo/src/proto/summation/BUILD` with
+And we'll create `$HOME/repo/src/proto/summation/lib.rs` with
 ```rust
 tonic::include_proto!("src_proto_summation");
 ```
